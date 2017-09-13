@@ -90,13 +90,13 @@
         currentQ = model.Q;
         currentQSquared = model.Q' * model.Q;
         
-        scoreAterm1 = expectedValueXttXtt / currentQ;
+        scoreAterm1 = expectedValueXttXt / currentQ;
         scoreAterm2 = - expectedValueXtXt / currentQ * A;
         scoreA = scoreA + scoreAterm1 + scoreAterm2;
 
         scoreQterm1 = currentQ;
         scoreQterm2 = expectedValueXttXtt / currentQSquared;
-        scoreQterm3 = expectedValueXtXt * A' / currentQSquared;
+        scoreQterm3 = expectedValueXtXt * A' / currentQSquared * A;
         scoreQterm4 = -2.0 * expectedValueXttXt / currentQSquared * A;
         scoreQ = scoreQ + scoreQterm1 + scoreQterm2 + scoreQterm3 + scoreQterm4;
     end

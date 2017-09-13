@@ -8,7 +8,7 @@ model.dimObservation = 1;
 
 model.initialState = 0;
 
-%% Data generation
+% Data generation
 
 data.input = zeros([1 model.noObservations]);
 
@@ -45,6 +45,7 @@ grid = 0:0.01:0.99;
 scoreA = zeros([1 length(grid)]);
 
 for i = 1:length(grid)
+    model.Q = 1.0;
     model.A = grid(i);
     ksOutput = kalmanSmoother(data, model, settings);
     scoreA(i) = ksOutput.scoreA;
