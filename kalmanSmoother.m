@@ -16,6 +16,7 @@
     predictedStateCovariance = zeros([dimState, dimState, noObservations]);
     filteredStateCovariance = zeros([dimState, dimState, noObservations]);
     kalmanGain = zeros([dimState, noObservations]);
+    logLikelihood = 0.0;
 
     % Kalman filter
     filteredStateEstimate(:, 1) = settings.initialState;
@@ -32,6 +33,9 @@
         predictedStateCovariance(:, :, t) = R1(1:dimState, 1:dimState);
 
         innovation = observation(:, t) - C * predictedStateEstimate(:, t);
+
+        Pp = predictedStateCovariance(:, :, t)' * predictedStateCovariance(:, :, t);
+        logLikelihood = logLikelihood - 0.5 * dimState * log(2.0 * pi) - log(det(Pp)) - 0.5 * innovation / Pp * innovation';
 
         % Compute QR-factorization of [R' 0; Pp'C' Pp'] to get K and Pf
         dimQR2 = dimState + dimObservation;
@@ -110,6 +114,7 @@
     output.filteredStateCovariance = filteredStateCovariance;
     output.predictedStateCovariance = predictedStateCovariance;
     output.smoothedStateEstimate = smoothedStateEstimate;
+    output.logLikelihood = logLikelihood;
 end
 
 

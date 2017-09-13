@@ -2,7 +2,7 @@ model.A = 0.5;
 model.Q = 1.0;
 model.C = 1;
 model.R = 0.1;
-model.noObservations = 1000;
+model.noObservations = 10000;
 model.dimState = 1;
 model.dimObservation = 1;
 
@@ -35,33 +35,71 @@ ksOutput = kalmanSmoother(data, model, settings);
 figure(1);
 grid = 1:model.noObservations;
 
+subplot(3, 2, [1 2]);
 plot(grid, data.state(1, :), grid, ksOutput.filteredStateEstimate(1, :), grid, ksOutput.predictedStateEstimate(1, :), grid, ksOutput.smoothedStateEstimate(1, :))
-mean((data.state(1, :) - ksOutput.filteredStateEstimate(1, :)).^2)
-mean((data.state(1, 1:end-1) - ksOutput.predictedStateEstimate(1, 2:end)).^2)
-mean((data.state(1, :) - ksOutput.smoothedStateEstimate(1, :)).^2)
+
+mseFilter = mean((data.state(1, :) - ksOutput.filteredStateEstimate(1, :)).^2);
+msePredictor = mean((data.state(1, 1:end-1) - ksOutput.predictedStateEstimate(1, 2:end)).^2);
+mseSmoother = mean((data.state(1, :) - ksOutput.smoothedStateEstimate(1, :)).^2);
+[mseFilter msePredictor mseSmoother]
 
 %%
 grid = 0:0.01:0.99;
 scoreA = zeros([1 length(grid)]);
+logLikelihoodA = zeros([1 length(grid)]);
+theta = model;
 
 for i = 1:length(grid)
-    model.Q = 1.0;
-    model.A = grid(i);
-    ksOutput = kalmanSmoother(data, model, settings);
+    theta.A = grid(i);
+    ksOutput = kalmanSmoother(data, theta, settings);
     scoreA(i) = ksOutput.scoreA;
+    logLikelihoodA(i) = ksOutput.logLikelihood;
 end
 
+subplot(3, 2, 3);
 plot(grid, scoreA)
+hold on;
+    vline(model.A);
+    hline(0.0);
+hold off;
+xlabel('A'); 
+ylabel('Score function');
+
+subplot(3, 2, 4);
+plot(grid, logLikelihoodA)
+hold on;
+    vline(model.A);
+hold off;
+xlabel('A'); 
+ylabel('logLikelihood');
 
 %%
 grid = 0.1:0.1:3;
 scoreQ = zeros([1 length(grid)]);
+logLikelihoodQ = zeros([1 length(grid)]);
+theta = model;
 
 for i = 1:length(grid)
-    model.A = 0.5;
-    model.Q = grid(i);
-    ksOutput = kalmanSmoother(data, model, settings);
+    theta.Q = grid(i);
+    ksOutput = kalmanSmoother(data, theta, settings);
     scoreQ(i) = ksOutput.scoreA;
+    logLikelihoodQ(i) = ksOutput.logLikelihood;
 end
 
+subplot(3, 2, 5);
 plot(grid, scoreQ)
+hold on;
+    vline(model.Q);
+    hline(0.0);
+hold off;
+xlabel('Q'); 
+ylabel('Score function');
+
+
+subplot(3, 2, 6);
+plot(grid, logLikelihoodQ)
+hold on;
+    vline(model.Q);
+hold off;
+xlabel('Q'); 
+ylabel('logLikelihood');
