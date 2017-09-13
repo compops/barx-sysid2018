@@ -78,6 +78,31 @@
         Pf = filteredStateCovariance(:, :, t)' * filteredStateCovariance(:, :, t);
         smoothedStateCovarianceTwoStep(: , :, t) = Pf * gainFactor(:, :, t)' + gainFactor(:, :, t) * (smoothedStateCovarianceTwoStep(: , :, t+1) - A * Pf) * gainFactor(:, :, t)';
     end
+
+    % Compute score function
+    scoreA = zeros([dimState dimState]);
+    scoreQ = zeros([dimState dimState]);
+    for t = 2:noObservations
+        expectedValueXttXtt = smoothedStateEstimate(:, 1) * smoothedStateEstimate(:, 1)' + smoothedStateCovariance(:, :, t)' * smoothedStateCovariance(:, :, t);
+        expectedValueXttXt = smoothedStateEstimate(:, t-1) * smoothedStateEstimate(:, t)' + smoothedStateCovarianceTwoStep(: , :, t-1);
+        expectedValueXtXt = smoothedStateEstimate(:, t-1) * smoothedStateEstimate(:, t-1)' + smoothedStateCovariance(:, :, t-1)' * smoothedStateCovariance(:, :, t-1);
+        
+        currentQ = model.Q;
+        currentQSquared = model.Q' * model.Q;
+        
+        scoreAterm1 = expectedValueXttXtt / currentQ;
+        scoreAterm2 = - expectedValueXtXt / currentQ * A;
+        scoreA = scoreA + scoreAterm1 + scoreAterm2;
+
+        scoreQterm1 = currentQ;
+        scoreQterm2 = expectedValueXttXtt / currentQSquared;
+        scoreQterm3 = expectedValueXtXt * A' / currentQSquared;
+        scoreQterm4 = -2.0 * expectedValueXttXt / currentQSquared * A;
+        scoreQ = scoreQ + scoreQterm1 + scoreQterm2 + scoreQterm3 + scoreQterm4;
+    end
+
+    output.scoreA = scoreA;
+    output.scoreQ = -0.5 * scoreQ;
     
     output.filteredStateEstimate = filteredStateEstimate;
     output.predictedStateEstimate = predictedStateEstimate;
