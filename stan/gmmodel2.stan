@@ -2,7 +2,7 @@ data {
   int<lower = 1> noComponents;
   int<lower = 1> noObservations;
   real observations[noObservations];
-  real alpha0;
+  real alpha;
   int<lower = 0> noGridPoints;
   vector[noGridPoints] gridPoints;
 }
@@ -10,20 +10,26 @@ data {
 parameters {
   simplex[noComponents] weights;
   ordered[noComponents] mu;
-  real<lower=0, upper=10> sigma[noComponents];
-  real alpha;
+  vector<lower=0>[noComponents] sigma;
+  real<lower=0> e0;
+  real<lower=0> sigma0;
 }
 
 model {
   real ps[noComponents];
-  vector[noComponents] alphaVector;
-  
-  mu ~ normal(0, 10);
+  vector[noComponents] e0Vector;
 
-  alpha ~ gamma(alpha0, alpha0 * noComponents);
+  e0 ~ gamma(alpha, alpha * noComponents);
   for (k in 1:noComponents)
-        alphaVector[k] = alpha;
-  weights ~ dirichlet(alphaVector);
+        e0Vector[k] = e0;
+  weights ~ dirichlet(e0Vector);
+  
+  sigma0 ~ cauchy(0, 1.0);
+  mu ~ normal(0, sigma0^2);
+  //sigma0 ~ gamma(1.0, 1.0);
+  //mu ~ normal(0, sigma0);
+  
+  sigma ~ cauchy(0, 1.0);
     
   for (n in 1:noObservations) {
     for (k in 1:noComponents)
@@ -41,3 +47,5 @@ generated quantities {
         log_p_y_tilde[n] = log_sum_exp(ps);
     }
 }
+
+

@@ -14,7 +14,7 @@ model {
     alpha ~ normal(0, 1);
     sigma0 ~ gamma(1, 1);
     beta ~ double_exponential(0, sigma0);
-    sigma ~ cauchy(0, 5);
+    sigma ~ cauchy(0, 1);
     y ~ normal(x[:, 1] + x[:, 2:] * beta + alpha, sigma);
 }
 generated quantities {}

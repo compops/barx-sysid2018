@@ -8,13 +8,12 @@ def buildPhiMatrix(data, order):
     return(Phi[order:, :])
 
 
-# order = 5
-# noObservations = 1000
-# beta = np.poly(np.random.uniform(low=-1.0, high=1.0, size=order))
-# regressors = np.random.normal(loc=0.0, scale=0.1, size=noObservations)
-
-# PhiFull = buildPhiMatrix(regressors, order)
-# y = np.dot(PhiFull, beta)
-
-# print(beta)
-# print(np.linalg.lstsq(PhiFull, y)[0])
+# From https://stackoverflow.com/questions/36200913/generate-n-random-numbers-from-a-skew-normal-distribution-using-numpy
+def randn_skew_fast(N, alpha=0.0, loc=0.0, scale=1.0):
+    sigma = alpha / np.sqrt(1.0 + alpha**2) 
+    u0 = np.random.randn(N)
+    v = np.random.randn(N)
+    u1 = (sigma*u0 + np.sqrt(1.0 - sigma**2)*v) * scale
+    u1[u0 < 0] *= -1
+    u1 = u1 + loc
+    return u1

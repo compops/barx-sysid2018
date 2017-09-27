@@ -1,11 +1,12 @@
 import numpy as np
 import pystan
 import matplotlib.pylab as plt
+from scipy.stats import norm
 
 model = {}
-model.update({'compProb': (0.2, 0.4, 0.4)})
-model.update({'compMean': (-2 ,0, 4)})
-model.update({'compStd': (1, 2, 3)})
+model.update({'compProb': (0.4, 0.2, 0.4)})
+model.update({'compMean': (-5 , 0, 5)})
+model.update({'compStd': (1, 3, 1)})
 
 noObservations = 200
 noComponents = int(len(model['compProb']))
@@ -24,15 +25,24 @@ for idx in range(noObservations):
 gridPoints = np.arange(-10, 10, 0.01)
 noGridPoints = len(gridPoints)
 data = {'noObservations': noObservations, 
-        'noComponents': 3, 
+        'noComponents': 5, 
         'observations': observations, 
-        'alpha0': 10.0, 
+        'alpha': 10.0, 
         'noGridPoints': noGridPoints, 
         'gridPoints': gridPoints}
 
 sm = pystan.StanModel(file='gmmodel2.stan')
 fit = sm.sampling(data=data, iter=10000, chains=1)
 
-print(fit)
-fit.plot()
+trueMixtureDensity = np.zeros((1, len(gridPoints)))
+for i in range(len(model['compMean'])):
+    trueMixtureDensity += model['compProb'][i] * norm.pdf(gridPoints, model['compMean'][i], model['compStd'][i]**2)
+
+estMixtureDensity = np.mean(np.exp(fit.extract("log_p_y_tilde")['log_p_y_tilde']), axis=0)
+plt.plot(gridPoints, trueMixtureDensity[0, :], 'b', gridPoints, estMixtureDensity ,'g')
 plt.show()
+
+
+#print(fit)
+#fit.plot()
+#plt.show()
