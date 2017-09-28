@@ -2,7 +2,7 @@ import pystan
 import numpy as np
 from scipy.signal import lfilter
 import matplotlib.pylab as plt
-from helpers import buildPhiMatrix
+from helpers import buildPhiMatrix, saveResultsFIR
 
 systemModel = {'noObservations': 1000,
                'order': 5,
@@ -39,8 +39,4 @@ data = {'noObservations': len(yGuessedModelOrder), 'systemOrder': modelOrderGues
 sm = pystan.StanModel(file='firmodel.stan')
 fit = sm.sampling(data=data, iter=10000, chains=1)
 
-print(fit)
-print(systemModel['coefficients'])
-
-fit.plot()
-plt.show()
+saveResultsFIR(systemModel['output'], systemModel['input'], fit, 'firOrderFiveGuessedTen')

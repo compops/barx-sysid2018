@@ -26,8 +26,6 @@ model {
   
   sigma0 ~ cauchy(0, 1.0);
   mu ~ normal(0, sigma0^2);
-  //sigma0 ~ gamma(1.0, 1.0);
-  //mu ~ normal(0, sigma0);
   
   sigma ~ cauchy(0, 1.0);
     

@@ -1,8 +1,9 @@
+import json
 import numpy as np
 import matplotlib.pylab as plt
 import seaborn as sns
 from palettable.colorbrewer.qualitative import Dark2_8
-
+from scipy.stats import gaussian_kde
 
 def buildPhiMatrix(data, order):
     noObservations = len(data)
@@ -22,12 +23,12 @@ def randn_skew_fast(N, alpha=0.0, loc=0.0, scale=1.0):
     u1 = u1 + loc
     return u1
 
-def plotting_helper(fit):
-    plt.figure(1)
+def plotResultsMixtures(model, observations, gridPoints, name):
+    fig1 = plt.figure(1)
     plt.subplot(3, 2, (1, 2))
     kernelDensityEstimator = gaussian_kde(observations)
     trueMixtureDensity = kernelDensityEstimator(gridPoints)
-    estMixtureDensity = np.mean(np.exp(fit.extract("log_p_y_tilde")['log_p_y_tilde']), axis=0)
+    estMixtureDensity = np.mean(np.exp(model.extract("log_p_y_tilde")['log_p_y_tilde']), axis=0)
     plt.plot(gridPoints, trueMixtureDensity, 'b', gridPoints, estMixtureDensity ,'g')
     sns.despine(left=False, bottom=False, right=True)
     plt.xlabel("x")
@@ -35,41 +36,80 @@ def plotting_helper(fit):
 
     plt.subplot(3, 2, 3)
     for i in range(5):
-            sns.distplot(fit.extract("mu")['mu'][:, i], color = Dark2_8.mpl_colors[i])
+            sns.distplot(model.extract("mu")['mu'][:, i], color = Dark2_8.mpl_colors[i])
     sns.despine(left=False, bottom=False, right=True)
-    plt.ylim(0, 10)
     plt.xlabel("mu")
     plt.ylabel("posterior estimate")
 
     plt.subplot(3, 2, 4)
     for i in range(5):
-            sns.distplot(fit.extract("sigma")['sigma'][:, i], color = Dark2_8.mpl_colors[i])
+            sns.distplot(model.extract("sigma")['sigma'][:, i], color = Dark2_8.mpl_colors[i])
     sns.despine(left=False, bottom=False, right=True)
-    plt.ylim(0, 10)
     plt.xlabel("sigma")
     plt.ylabel("posterior estimate")
 
     plt.subplot(3, 2, 5)
-    sns.distplot(fit.extract("sigma0")['sigma0'], color = Dark2_8.mpl_colors[6])
+    sns.distplot(model.extract("sigma0")['sigma0'], color = Dark2_8.mpl_colors[6])
     sns.despine(left=False, bottom=False, right=True)
     plt.xlabel("sigma0")
     plt.ylabel("posterior estimate")
 
     plt.subplot(3, 2, 6)
-    sns.distplot(fit.extract("e0")['e0'], color = Dark2_8.mpl_colors[7])
+    sns.distplot(model.extract("e0")['e0'], color = Dark2_8.mpl_colors[7])
     sns.despine(left=False, bottom=False, right=True)
     plt.xlabel("e0")
     plt.ylabel("posterior estimate")
-    plt.show()
+    plt.show(fig1)
+    fig1.savefig(name + '_posteriors.png')
+    plt.close(fig1)
 
-    plt.figure(2)
+    fig2 = plt.figure(2)
     for i in range(5):
             plt.subplot(5, 2, 2*i + 1)
-            plt.plot(fit.extract("mu")['mu'][:, i], color = Dark2_8.mpl_colors[i])
+            plt.plot(model.extract("mu")['mu'][:, i], color = Dark2_8.mpl_colors[i])
             plt.xlabel("mu")
             plt.ylabel("Trace")
             plt.subplot(5, 2, 2*i + 2)
-            plt.plot(fit.extract("sigma")['sigma'][:, i], color = Dark2_8.mpl_colors[i])
+            plt.plot(model.extract("sigma")['sigma'][:, i], color = Dark2_8.mpl_colors[i])
             plt.xlabel("sigma")
             plt.ylabel("Trace")
-    plt.show()
+    plt.show(fig2)
+    fig2.savefig(name + '_traces.png')
+    plt.close(fig2)
+
+
+def saveResultsMixtures(gridPoints, observations, model, name):
+    
+    kernelDensityEstimator = gaussian_kde(observations)
+    trueMixtureDensity = kernelDensityEstimator(gridPoints)
+    estMixtureDensity = np.mean(np.exp(model.extract("log_p_y_tilde")['log_p_y_tilde']), axis=0)
+
+    results = {}
+    results.update({'kernelDensityEstimate': trueMixtureDensity.tolist()})
+    results.update({'MCMCDensityEstimate': estMixtureDensity.tolist()})
+    results.update({'sigma0': model.extract("sigma0")['sigma0'].tolist()})
+    results.update({'e0': model.extract("e0")['e0'].tolist()})
+    results.update({'weights': model.extract("weights")['weights'].tolist()})
+    results.update({'mu': model.extract("mu")['mu'].tolist()})
+    results.update({'sigma': model.extract("sigma")['sigma'].tolist()})
+    results.update({'observations': observations.tolist()})
+    results.update({'gridPoints': gridPoints.tolist()})
+    results.update({'name': name})
+
+    with open('output_' + name + '.json', 'w') as f:
+        json.dump(results, f, ensure_ascii=False)
+
+
+def saveResultsFIR(observations, inputs, model, name):
+    
+    results = {}
+    results.update({'mu': model.extract("mu")['mu'].tolist()})
+    results.update({'b': model.extract("b")['b'].tolist()})
+    results.update({'sigma': model.extract("sigma")['sigma'].tolist()})
+    results.update({'sigma0': model.extract("sigma0")['sigma0'].tolist()})
+    results.update({'observations': observations.tolist()})
+    results.update({'inputs': inputs.tolist()})
+    results.update({'name': name})
+
+    with open('output_' + name + '.json', 'w') as f:
+        json.dump(results, f, ensure_ascii=False)

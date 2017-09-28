@@ -5,16 +5,18 @@ data {
     vector[noObservations] y;
 }
 parameters {
-    real alpha;
-    vector[systemOrder] beta;
+    real mu;
+    vector[systemOrder] b;
     real<lower=0> sigma;
     real<lower=0> sigma0;
 }
 model {
-    alpha ~ normal(0, 1);
-    sigma0 ~ gamma(1, 1);
-    beta ~ double_exponential(0, sigma0);
-    sigma ~ cauchy(0, 1);
-    y ~ normal(x[:, 1] + x[:, 2:] * beta + alpha, sigma);
+    mu ~ normal(0, 1.0);
+
+    sigma0 ~ cauchy(0, 1.0);
+    b ~ normal(0, sigma0^2);
+
+    sigma ~ cauchy(0, 1.0);
+    y ~ normal(x[:, 1] + x[:, 2:] * b + mu, sigma);
 }
 generated quantities {}
