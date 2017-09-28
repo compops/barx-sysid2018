@@ -16,7 +16,7 @@ layout(matrix(c(1, 2, 3, 3, 4, 5), 3, 2, byrow = TRUE))
 par(mar = c(4, 5, 1, 1))
 
 ##################################################################################################
-plot(traceIterationsToPlot[timeIntervalToPlot], 
+plot(timeIntervalToPlot, 
      result$observations[timeIntervalToPlot], 
      type = "l", 
      col = plotColors[1], 
@@ -34,7 +34,7 @@ polygon(c(timeIntervalToPlot, rev(timeIntervalToPlot)),
 
 
 ##################################################################################################
-plot(traceIterationsToPlot[timeIntervalToPlot], 
+plot(timeIntervalToPlot, 
      result$inputs[timeIntervalToPlot], 
      type = "l", 
      col = plotColors[2], 
