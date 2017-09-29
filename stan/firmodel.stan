@@ -16,7 +16,7 @@ model {
     sigma0 ~ cauchy(0, 1.0);
     b ~ normal(0, sigma0^2);
 
-    sigma ~ cauchy(0, 1.0);
+    sigma ~ cauchy(0, 5.0);
     y ~ normal(x[:, 1] + x[:, 2:] * b + mu, sigma);
 }
 generated quantities {}

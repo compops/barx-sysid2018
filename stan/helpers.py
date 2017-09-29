@@ -113,3 +113,27 @@ def saveResultsFIR(observations, inputs, model, name):
 
     with open('output_' + name + '.json', 'w') as f:
         json.dump(results, f, ensure_ascii=False)
+
+    
+def saveResultsARXMixture(gridPoints, observations, model, name):
+    
+    kernelDensityEstimator = gaussian_kde(observations)
+    trueMixtureDensity = kernelDensityEstimator(gridPoints)
+    estMixtureDensity = np.mean(np.exp(model.extract("log_p_y_tilde")['log_p_y_tilde']), axis=0)
+
+    results = {}
+    results.update({'kernelDensityEstimate': trueMixtureDensity.tolist()})
+    results.update({'MCMCDensityEstimate': estMixtureDensity.tolist()})
+    results.update({'sigma0': model.extract("sigma0")['sigma0'].tolist()})
+    #results.update({'sigmab': model.extract("sigmab")['sigmab'].tolist()})
+    results.update({'e0': model.extract("e0")['e0'].tolist()})
+    results.update({'weights': model.extract("weights")['weights'].tolist()})
+    results.update({'g': model.extract("g")['g'].tolist()})
+    #results.update({'mu': model.extract("mu")['mu'].tolist()})
+    results.update({'sigma': model.extract("sigma")['sigma'].tolist()})
+    results.update({'observations': observations.tolist()})
+    results.update({'gridPoints': gridPoints.tolist()})
+    results.update({'name': name})
+
+    with open('output_' + name + '.json', 'w') as f:
+        json.dump(results, f, ensure_ascii=False)

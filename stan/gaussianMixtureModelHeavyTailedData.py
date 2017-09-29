@@ -19,7 +19,7 @@ data = {'noObservations': noObservations,
         'gridPoints': gridPoints}
 
 sm = pystan.StanModel(file='gmmodel2.stan')
-fit = sm.sampling(data=data, iter=10000, chains=1)
+fit = sm.sampling(data=data, iter=2000, chains=1)
 
 # Plot and save to file
 plotResults(fit, observations, gridPoints, 'heavytailed')

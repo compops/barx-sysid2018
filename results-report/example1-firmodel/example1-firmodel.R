@@ -2,6 +2,7 @@ setwd("~/src/hmc-sysid2018/results-report/example1-firmodel")
 library("jsonlite")
 library("RColorBrewer")
 plotColors = brewer.pal(8, "Dark2")
+plotColors = c(plotColors, rep(plotColors[8], 8))
 
 name <- "firOrderFiveGuessedTen"
 trueParameters <- c(-0.71, -0.38, 0.17, -0.005, -0.001)
