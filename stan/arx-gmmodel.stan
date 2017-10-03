@@ -11,9 +11,12 @@ data {
 parameters {
   simplex[noComponents] weights;
   vector<lower=-1, upper=1>[maxLag] g;
-  positive_ordered[noComponents] sigma;
+  //positive_ordered[noComponents] sigma;
+  ordered[noComponents] mu;
+  vector<lower=0>[noComponents] sigma;
   real<lower=0> e0;
   real<lower=0> sigma0;
+  real<lower=0> sigmamu;
 }
 
 model {
@@ -27,8 +30,11 @@ model {
 
   sigma0 ~ cauchy(0, 1.0);
   g ~ normal(0, sigma0^2);
+
+  sigmamu ~ cauchy(0, 1.0);
+  mu ~ normal(0, sigmamu^2);  
   
-  sigma ~ cauchy(0, 5.0);
+  sigma ~ cauchy(0, 1.0);
     
   for (n in (maxLag+1):noObservations) {
     real ar_part;
@@ -38,7 +44,7 @@ model {
         ar_part = ar_part + g[k] * observations[n-k];
          
     for (k in 1:noComponents)
-        ps[k] = log(weights[k]) + normal_lpdf(observations[n] | ar_part, sigma[k]);
+        ps[k] = log(weights[k]) + normal_lpdf(observations[n] | mu[k] + ar_part, sigma[k]);
     target += log_sum_exp(ps);    
   }
 }
@@ -46,9 +52,9 @@ model {
 generated quantities {
     vector[noGridPoints] log_p_y_tilde;
     real ps[noComponents];
-    for (n in 1:noGridPoints) {
+    for (n in 1:noGridPoints) {           
         for (k in 1:noComponents)
-            ps[k] = log(weights[k]) + normal_lpdf(gridPoints[n] | 0, sigma[k]);
+            ps[k] = log(weights[k]) + normal_lpdf(gridPoints[n] | mu[k], sigma[k]);
         log_p_y_tilde[n] = log_sum_exp(ps);
     }
 }

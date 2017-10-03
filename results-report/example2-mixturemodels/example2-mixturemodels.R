@@ -3,6 +3,7 @@ library("jsonlite")
 library("RColorBrewer")
 #library("sn")
 plotColors = brewer.pal(8, "Dark2");
+plotColors = c(plotColors, rep(plotColors[8], 8))
 
 #name <- "uniform"; gridLimits <- c(-4, 4); trueDensity <- function(x) {dunif(x, -2, 2)};
 #name <- "mixture"; gridLimits <- c(-10, 10); trueDensity <- function(x) {0.4 * dnorm(x, -5, 1) + 0.2 * dnorm(x, 0, 3) + 0.4 * dnorm(x, 4, 1)};

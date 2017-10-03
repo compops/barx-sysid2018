@@ -3,15 +3,17 @@ library("jsonlite")
 library("RColorBrewer")
 #library("sn")
 plotColors = brewer.pal(8, "Dark2");
+plotColors = c(plotColors, plotColors)
 
-name <- "arxGaussianMixtureEEGData"; gridLimits <- c(-10, 10); trueDensity
-savePlotsToFile <- FALSE
+
+name <- "arxGaussianMixtureEEGData"; gridLimits <- c(-10, 10);
+savePlotsToFile <- TRUE
 
 traceIterationsToPlot <- seq(1, 1000, 1)
 result <- read_json(paste(paste("output_", name, sep=""), ".json", sep=""), simplifyVector = TRUE)
 nbins <- floor(sqrt(length(result$sigma0)))
 
-noComponents <- dim(result$mu)[2]
+noComponents <- dim(result$sigma)[2]
 estMixtureComponents <- matrix(0, nrow = length(result$gridPoints), ncol = noComponents)
 
 for (i in 1:length(result$gridPoints)) {
@@ -34,7 +36,7 @@ plot(result$gridPoints,
      lwd = 2,
      xlab = "x",
      ylab = "mixture density",
-     ylim = 1.2 *range(c(result$kernelDensityEstimate, result$MCMCDensityEstimate)),
+     #ylim = 1.2 *range(c(result$kernelDensityEstimate, result$MCMCDensityEstimate)),
      xlim = gridLimits     
 )
 
@@ -48,7 +50,7 @@ plot(result$gridPoints,
      lwd = 2,
      xlab = "x",
      ylab = "mixture components",
-     ylim = 1.2 *range(estMixtureComponents),
+     ylim = 1.2 * range(estMixtureComponents),
      xlim = gridLimits
 )
 polygon(c(result$gridPoints, rev(result$gridPoints)),
@@ -80,8 +82,8 @@ hist(
   border = NA,
   xlab = expression(g),
   ylab = "posterior probability",
-  xlim = c(-2 , 2),
-  ylim = c(0, 15)
+  xlim = c(-1 , 1),
+  ylim = c(0, 20)
 )
 
 lines(density(
@@ -120,14 +122,14 @@ hist(
   border = NA,
   xlab = expression(e[0]),
   ylab = "posterior estimate",
-  xlim = c(1.5, 1.7)
+  xlim = c(0, 0.5)
 )
 
 lines(density(
   result$e0,
   kernel = "e",
-  from = 1.5,
-  to = 1.7
+  from = 0,
+  to = 0.5
 ),
 lwd = 2,
 col = plotColors[8])
@@ -142,38 +144,39 @@ hist(
   border = NA,
   xlab = expression(sigma[0]),
   ylab = "posterior estimate",
-  xlim = c(1.5, 4.0)
+  xlim = c(0, 1.2)
 )
 
 lines(density(
   result$sigma0,
   kernel = "e",
-  from = 1.5,
-  to = 4.0
+  from = 0,
+  to = 1.2
 ),
 lwd = 2,
 col = plotColors[8])
 
 ##################################################################################################
 hist(
-  result$sigmab,
+  result$sigmamu,
   breaks = nbins,
   main = "",
   freq = F,
   col = rgb(t(col2rgb(plotColors[8])) / 256, alpha = 0.25),
   border = NA,
-  xlab = expression(sigma[b]),
+  xlab = expression(sigma[mu]),
   ylab = "posterior estimate",
-  xlim = c(2.4, 2.6)
+  xlim = c(0, 5)
 )
 
 lines(density(
-  result$sigmab,
+  result$sigmamu,
   kernel = "e",
-  from = 2.4,
-  to = 2.6
+  from = 0,
+  to = 5
 ),
 lwd = 2,
 col = plotColors[8])
+
 
 if (savePlotsToFile) {dev.off()}

@@ -13,8 +13,8 @@ evaluationData = eegData[10000:]
 gridPoints = np.arange(-10, 10, 0.01)
 noGridPoints = len(gridPoints)
 data = {'noObservations': len(trainingData), 
-        'noComponents': 5, 
         'observations': trainingData, 
+        'noComponents': 5,
         'alpha': 10.0, 
         'noGridPoints': noGridPoints, 
         'gridPoints': gridPoints,
