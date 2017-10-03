@@ -1,61 +1,83 @@
 data {
-  int<lower = 1> maxLag;
-  int<lower = 1> noComponents;
-  int<lower = 1> noObservations;
-  real observations[noObservations];
-  real alpha;
-  int<lower = 0> noGridPoints;
-  vector[noGridPoints] gridPoints;
+  int<lower=1> maxLag;
+
+  int<lower=1> noComponents;
+  int<lower=1> noTrainingData;
+  int<lower=1> noGridPoints;
+  int<lower=1> noEvaluationData;
+
+  real mixtureWeightsHyperPrior;
+
+  real trainingData[noTrainingData];
+  real gridPoints[noGridPoints];
+  real evaluationData[noEvaluationData];
 }
 
 parameters {
-  simplex[noComponents] weights;
-  vector<lower=-1, upper=1>[maxLag] g;
-  //positive_ordered[noComponents] sigma;
-  ordered[noComponents] mu;
-  vector<lower=0>[noComponents] sigma;
-  real<lower=0> e0;
-  real<lower=0> sigma0;
-  real<lower=0> sigmamu;
+  vector<lower=-1, upper=1>[maxLag] filterCoefficient;
+
+  simplex[noComponents] mixtureWeights;
+  ordered[noComponents] mixtureMean;
+  vector<lower=0>[noComponents] mixtureVariance;
+
+  real<lower=0> filterCoefficientPrior;
+  real<lower=0> mixtureWeightsPrior;
+  real mixtureMeanPrior;
+  real<lower=0> mixtureVariancePrior;
 }
 
 model {
-  real ps[noComponents];
-  vector[noComponents] e0Vector;
+  vector[noComponents] mixtureWeightsPriorVector;
+  real logPosteriorPerComponent[noComponents];
+  real autoRegressivePart;
 
-  e0 ~ gamma(alpha, alpha * noComponents);
-  for (k in 1:noComponents)
-        e0Vector[k] = e0;
-  weights ~ dirichlet(e0Vector);
-
-  sigma0 ~ cauchy(0, 1.0);
-  g ~ normal(0, sigma0^2);
-
-  sigmamu ~ cauchy(0, 1.0);
-  mu ~ normal(0, sigmamu^2);  
+  filterCoefficientPrior ~ cauchy(0, 1.0);
+  filterCoefficient ~ normal(0, filterCoefficientPrior^2);
   
-  sigma ~ cauchy(0, 1.0);
-    
-  for (n in (maxLag+1):noObservations) {
-    real ar_part;
-    ar_part = 0.0;
+  mixtureWeightsPrior ~ gamma(mixtureWeightsHyperPrior, mixtureWeightsHyperPrior * noComponents);
+  for (k in 1:noComponents)
+        mixtureWeightsPriorVector[k] = mixtureWeightsPrior;
+  mixtureWeights ~ dirichlet(mixtureWeightsPriorVector);
+  mixtureMeanPrior ~ cauchy(0, 1.0);
+  mixtureMean ~ normal(0, mixtureMeanPrior^2);    
+  mixtureVariance ~ cauchy(0, 1.0);
+
+  for (n in (maxLag+1):noTrainingData) {
+    autoRegressivePart = 0.0;
 
     for (k in 1:maxLag)
-        ar_part = ar_part + g[k] * observations[n-k];
+        autoRegressivePart = autoRegressivePart + filterCoefficient[k] * trainingData[n-k];
          
     for (k in 1:noComponents)
-        ps[k] = log(weights[k]) + normal_lpdf(observations[n] | mu[k] + ar_part, sigma[k]);
-    target += log_sum_exp(ps);    
+        logPosteriorPerComponent[k] = log(mixtureWeights[k]) + normal_lpdf(trainingData[n] | mixtureMean[k] + autoRegressivePart, mixtureVariance[k]);
+    target += log_sum_exp(logPosteriorPerComponent);    
   }
 }
 
 generated quantities {
-    vector[noGridPoints] log_p_y_tilde;
-    real ps[noComponents];
+    real mixtureOnGrid[noGridPoints];
+    real logPosteriorPerComponent[noComponents];
+    real predictiveMean[noEvaluationData];
+    real predictiveVariance[noEvaluationData];
+    real autoRegressivePart;
+
     for (n in 1:noGridPoints) {           
         for (k in 1:noComponents)
-            ps[k] = log(weights[k]) + normal_lpdf(gridPoints[n] | mu[k], sigma[k]);
-        log_p_y_tilde[n] = log_sum_exp(ps);
+            logPosteriorPerComponent[k] = log(mixtureWeights[k]) + normal_lpdf(gridPoints[n] | mixtureMean[k], mixtureVariance[k]);
+        mixtureOnGrid[n] = log_sum_exp(logPosteriorPerComponent);
+    }
+
+    for (n in (maxLag+1):noEvaluationData) {
+        autoRegressivePart = 0.0;
+        for (k in 1:maxLag)
+            autoRegressivePart = autoRegressivePart + filterCoefficient[k] * evaluationData[n-k];
+        
+        predictiveMean[n] = 0.0;
+        predictiveVariance[n] = 0.0;
+        for (k in 1:noComponents) {
+            predictiveMean[n] = predictiveMean[n] + mixtureWeights[k] * (mixtureMean[k] + autoRegressivePart);
+            predictiveVariance[n] = predictiveVariance[n] + mixtureWeights[k]^2 * mixtureVariance[k];
+        }
     }
 }
 

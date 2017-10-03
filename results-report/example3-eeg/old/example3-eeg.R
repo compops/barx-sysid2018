@@ -7,63 +7,30 @@ plotColors = c(plotColors, plotColors)
 
 
 name <- "arxGaussianMixtureEEGData"; gridLimits <- c(-10, 10);
-savePlotsToFile <- FALSE
+savePlotsToFile <- TRUE
 
 traceIterationsToPlot <- seq(1, 1000, 1)
 result <- read_json(paste(paste("output_", name, sep=""), ".json", sep=""), simplifyVector = TRUE)
-nbins <- floor(sqrt(length(result$mixtureWeightsPrior)))
+nbins <- floor(sqrt(length(result$sigma0)))
 
-noComponents <- dim(result$mixtureVariance)[2]
+noComponents <- dim(result$sigma)[2]
 estMixtureComponents <- matrix(0, nrow = length(result$gridPoints), ncol = noComponents)
 
 for (i in 1:length(result$gridPoints)) {
   for (j in 1:noComponents) {
-    estMixtureComponents[i, j] <- mean(result$mixtureWeights[, j] * dnorm(result$gridPoints[i], mean = result$mixtureMean[, j], sd = sqrt(result$mixtureVariance[, j])))
+    estMixtureComponents[i, j] <- mean(result$weights[, j] * dnorm(result$gridPoints[i], mean = result$mu[, j], sd = sqrt(result$sigma[, j])))
   }
 }
 
 if (savePlotsToFile) {cairo_pdf(paste(paste("example3-", name, sep=""), ".pdf", sep=""),  height = 10, width = 8)}
-layout(matrix(c(1, 1, 1, 2, 3, 3, 4, 4, 4, 5, 6, 7), 4, 3, byrow = TRUE))
+layout(matrix(c(1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 5, 6), 4, 3, byrow = TRUE))
 par(mar = c(4, 5, 1, 1))
 
 ##################################################################################################
 
-plot(result$trainingData, 
-     col = plotColors[1], 
-     type = "l",
-     bty = "n",
-     lwd = 2,
-     xlab = "time",
-     ylab = "observation",
-     xlim = c(0, length(result$trainingData) + length(result$evaluationData)),
-     ylim = c(4400, 5200)
-)
-grid <- seq(length(result$trainingData) + 1, length(result$trainingData) + length(result$evaluationData))
-lines(grid,
-     result$evaluationData,
-     col =rgb(t(col2rgb(plotColors[1])) / 256, alpha = 0.5),
-     lwd = 2
-)
-grid <- seq(length(result$trainingData) + 10, length(result$trainingData) + length(result$evaluationData) - 1)
-lines(grid,
-      result$predictiveMean,
-      col = plotColors[2],
-      lwd = 1
-)
-confidenceIntervalUpper <- result$predictiveMean + 1.96 * sqrt(result$predictiveMeanVariance)
-confidenceIntervalLower <- result$predictiveMean - 1.96 * sqrt(result$predictiveMeanVariance)
-polygon(c(grid, rev(grid)),
-        c(confidenceIntervalLower, rev(confidenceIntervalUpper)),
-        border = NA,
-        col = rgb(t(col2rgb(plotColors[2])) / 256, alpha = 0.15)
-)
-
-
-##################################################################################################
-
 plot(result$gridPoints, 
+     col = plotColors[2], 
      result$MCMCDensityEstimate, 
-     col = plotColors[2],      
      type = "l",
      bty = "n",
      lwd = 2,
@@ -107,7 +74,7 @@ for (i in 2:noComponents) {
 
 ##################################################################################################
 hist(
-  result$filterCoefficient[, 1],
+  result$g[, 1],
   breaks = nbins,
   main = "",
   freq = F,
@@ -120,7 +87,7 @@ hist(
 )
 
 lines(density(
-  result$filterCoefficient[, 1],
+  result$g[, 1],
   kernel = "e"
 ),
 lwd = 2,
@@ -128,7 +95,7 @@ col = plotColors[3])
 
 for (i in 2:10) {
   hist(
-    result$filterCoefficient[, i],
+    result$g[, i],
     breaks = nbins,
     freq = F,
     col = rgb(t(col2rgb(plotColors[2 + i])) / 256, alpha = 0.25),
@@ -137,7 +104,7 @@ for (i in 2:10) {
   )
   
   lines(density(
-    result$filterCoefficient[, i],
+    result$g[, i],
     kernel = "e"
   ),
   lwd = 2,
@@ -147,7 +114,7 @@ for (i in 2:10) {
 
 ##################################################################################################
 hist(
-  result$mixtureWeightsPrior,
+  result$e0,
   breaks = nbins,
   main = "",
   freq = F,
@@ -159,7 +126,7 @@ hist(
 )
 
 lines(density(
-  result$mixtureWeightsPrior,
+  result$e0,
   kernel = "e",
   from = 0,
   to = 0.5
@@ -169,7 +136,7 @@ col = plotColors[8])
 
 ##################################################################################################
 hist(
-  result$filterCoefficientPrior,
+  result$sigma0,
   breaks = nbins,
   main = "",
   freq = F,
@@ -181,7 +148,7 @@ hist(
 )
 
 lines(density(
-  result$filterCoefficientPrior,
+  result$sigma0,
   kernel = "e",
   from = 0,
   to = 1.2
@@ -191,7 +158,7 @@ col = plotColors[8])
 
 ##################################################################################################
 hist(
-  result$mixtureVariancePrior,
+  result$sigmamu,
   breaks = nbins,
   main = "",
   freq = F,
@@ -203,7 +170,7 @@ hist(
 )
 
 lines(density(
-  result$mixtureVariancePrior,
+  result$sigmamu,
   kernel = "e",
   from = 0,
   to = 5

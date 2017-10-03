@@ -115,23 +115,35 @@ def saveResultsFIR(observations, inputs, model, name):
         json.dump(results, f, ensure_ascii=False)
 
     
-def saveResultsARXMixture(gridPoints, observations, model, name):
-    
-    kernelDensityEstimator = gaussian_kde(observations)
+def saveResultsARXMixture(data, model, name):
+
+    gridPoints = data['gridPoints']
+    trainingData = data['trainingData']
+    evaluationData = data['evaluationData']
+
+    kernelDensityEstimator = gaussian_kde(trainingData)
     trueMixtureDensity = kernelDensityEstimator(gridPoints)
-    estMixtureDensity = np.mean(np.exp(model.extract("log_p_y_tilde")['log_p_y_tilde']), axis=0)
+    estMixtureDensity = np.mean(np.exp(model.extract("mixtureOnGrid")['mixtureOnGrid']), axis=0)
+    predictiveMeanTrace = model.extract("predictiveMean")['predictiveMean'][:, data['maxLag']:]
+    predictiveMean = np.mean(predictiveMeanTrace, axis=0)
+    predictiveMeanVariance = np.var(predictiveMeanTrace, axis=0)
+    predictiveVariance = np.mean(model.extract("predictiveVariance")['predictiveVariance'][:, data['maxLag']:], axis=0)
 
     results = {}
     results.update({'kernelDensityEstimate': trueMixtureDensity.tolist()})
     results.update({'MCMCDensityEstimate': estMixtureDensity.tolist()})
-    results.update({'sigma0': model.extract("sigma0")['sigma0'].tolist()})
-    results.update({'sigmamu': model.extract("sigmamu")['sigmamu'].tolist()})
-    results.update({'e0': model.extract("e0")['e0'].tolist()})
-    results.update({'weights': model.extract("weights")['weights'].tolist()})
-    results.update({'g': model.extract("g")['g'].tolist()})
-    results.update({'mu': model.extract("mu")['mu'].tolist()})
-    results.update({'sigma': model.extract("sigma")['sigma'].tolist()})
-    results.update({'observations': observations.tolist()})
+    results.update({'predictiveMean': predictiveMean.tolist()})
+    results.update({'predictiveMeanVariance': predictiveMean.tolist()})
+    results.update({'predictiveVariance': predictiveVariance.tolist()})
+    results.update({'filterCoefficient': model.extract("filterCoefficient")['filterCoefficient'].tolist()})
+    results.update({'mixtureWeightsPrior': model.extract("mixtureWeightsPrior")['mixtureWeightsPrior'].tolist()})
+    results.update({'filterCoefficientPrior': model.extract("filterCoefficientPrior")['filterCoefficientPrior'].tolist()})
+    results.update({'mixtureVariancePrior': model.extract("mixtureVariancePrior")['mixtureVariancePrior'].tolist()})
+    results.update({'mixtureWeights': model.extract("mixtureWeights")['mixtureWeights'].tolist()})
+    results.update({'mixtureMean': model.extract("mixtureMean")['mixtureMean'].tolist()})
+    results.update({'mixtureVariance': model.extract("mixtureVariance")['mixtureVariance'].tolist()})
+    results.update({'trainingData': trainingData.tolist()})
+    results.update({'evaluationData': evaluationData.tolist()})
     results.update({'gridPoints': gridPoints.tolist()})
     results.update({'name': name})
 
