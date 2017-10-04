@@ -1,17 +1,19 @@
 setwd("~/src/hmc-sysid2018/results-report/example3-eeg")
 library("jsonlite")
 library("RColorBrewer")
-#library("sn")
+
 plotColors = brewer.pal(8, "Dark2");
 plotColors = c(plotColors, plotColors)
 
-
-name <- "arxGaussianMixtureEEGData"; gridLimits <- c(-10, 10);
+name <- "arxGaussianMixtureEEGData1"
+gridLimits <- c(-10, 10)
 savePlotsToFile <- FALSE
 
-traceIterationsToPlot <- seq(1, 1000, 1)
 result <- read_json(paste(paste("output_", name, sep=""), ".json", sep=""), simplifyVector = TRUE)
 nbins <- floor(sqrt(length(result$mixtureWeightsPrior)))
+noTrainingData <- length(result$trainingData)
+noEvaluationData <- length(result$evaluationData)
+maxLag <- dim(result$filterCoefficient)[2]
 
 noComponents <- dim(result$mixtureVariance)[2]
 estMixtureComponents <- matrix(0, nrow = length(result$gridPoints), ncol = noComponents)
@@ -28,23 +30,29 @@ par(mar = c(4, 5, 1, 1))
 
 ##################################################################################################
 
+grid <- seq(1 , length(result$trainingData))
 plot(result$trainingData, 
      col = plotColors[1], 
      type = "l",
      bty = "n",
-     lwd = 2,
+     lwd = 1,
      xlab = "time",
      ylab = "observation",
-     xlim = c(0, length(result$trainingData) + length(result$evaluationData)),
-     ylim = c(4400, 5200)
+     xlim = c(0, noTrainingData + noEvaluationData),
+     ylim = c(4400, 5400)
+)
+polygon(c(grid, rev(grid)),
+        c(rep(-6, length(grid)), rev(result$trainingData)),
+        border = NA,
+        col = rgb(t(col2rgb(plotColors[1])) / 256, alpha = 0.15)
 )
 grid <- seq(length(result$trainingData) + 1, length(result$trainingData) + length(result$evaluationData))
 lines(grid,
      result$evaluationData,
      col =rgb(t(col2rgb(plotColors[1])) / 256, alpha = 0.5),
-     lwd = 2
+     lwd = 1
 )
-grid <- seq(length(result$trainingData) + 10, length(result$trainingData) + length(result$evaluationData) - 1)
+grid <- seq(noTrainingData + maxLag, noTrainingData + noEvaluationData - 1)
 lines(grid,
       result$predictiveMean,
       col = plotColors[2],
@@ -69,8 +77,12 @@ plot(result$gridPoints,
      lwd = 2,
      xlab = "x",
      ylab = "mixture density",
-     #ylim = 1.2 *range(c(result$kernelDensityEstimate, result$MCMCDensityEstimate)),
-     xlim = gridLimits     
+     xlim = gridLimits
+)
+polygon(c(result$gridPoints, rev(result$gridPoints)),
+        c(rep(0, length(result$gridPoints)), rev(result$MCMCDensityEstimate)),
+        border = NA,
+        col = rgb(t(col2rgb(plotColors[2])) / 256, alpha = 0.15)
 )
 
 ##################################################################################################
@@ -169,6 +181,28 @@ col = plotColors[8])
 
 ##################################################################################################
 hist(
+  result$mixtureMeanPrior,
+  breaks = nbins,
+  main = "",
+  freq = F,
+  col = rgb(t(col2rgb(plotColors[8])) / 256, alpha = 0.25),
+  border = NA,
+  xlab = expression(sigma[mu]),
+  ylab = "posterior estimate",
+  xlim = c(0, 5)
+)
+
+lines(density(
+  result$mixtureMeanPrior,
+  kernel = "e",
+  from = 0,
+  to = 5
+),
+lwd = 2,
+col = plotColors[8])
+
+##################################################################################################
+hist(
   result$filterCoefficientPrior,
   breaks = nbins,
   main = "",
@@ -189,27 +223,11 @@ lines(density(
 lwd = 2,
 col = plotColors[8])
 
-##################################################################################################
-hist(
-  result$mixtureVariancePrior,
-  breaks = nbins,
-  main = "",
-  freq = F,
-  col = rgb(t(col2rgb(plotColors[8])) / 256, alpha = 0.25),
-  border = NA,
-  xlab = expression(sigma[mu]),
-  ylab = "posterior estimate",
-  xlim = c(0, 5)
-)
-
-lines(density(
-  result$mixtureVariancePrior,
-  kernel = "e",
-  from = 0,
-  to = 5
-),
-lwd = 2,
-col = plotColors[8])
 
 
 if (savePlotsToFile) {dev.off()}
+
+squaredPredictionError = sum((result$predictiveMean - result$evaluationData[-(1:maxLag)])^2)
+squaredData = sum((result$evaluationData[-(1:maxLag)] - mean(result$evaluationData[-(1:maxLag)]))^2)
+modelFit = 100 * (1.0 - squaredPredictionError / squaredData)
+rmse = sqrt(mean((result$predictiveMean - result$evaluationData[-(1:maxLag)])^2))

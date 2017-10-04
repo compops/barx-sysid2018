@@ -23,7 +23,6 @@ parameters {
   real<lower=0> filterCoefficientPrior;
   real<lower=0> mixtureWeightsPrior;
   real mixtureMeanPrior;
-  real<lower=0> mixtureVariancePrior;
 }
 
 model {
@@ -67,10 +66,15 @@ generated quantities {
         mixtureOnGrid[n] = log_sum_exp(logPosteriorPerComponent);
     }
 
+    for(n in 1:(maxLag+1)) {
+        predictiveMean[n] = evaluationData[n];
+        predictiveVariance[n] = 0.0;
+    }
+
     for (n in (maxLag+1):noEvaluationData) {
         autoRegressivePart = 0.0;
         for (k in 1:maxLag)
-            autoRegressivePart = autoRegressivePart + filterCoefficient[k] * evaluationData[n-k];
+            autoRegressivePart = autoRegressivePart + filterCoefficient[k] * predictiveMean[n-k];
         
         predictiveMean[n] = 0.0;
         predictiveVariance[n] = 0.0;

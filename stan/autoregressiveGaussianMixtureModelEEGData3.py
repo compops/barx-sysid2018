@@ -5,10 +5,10 @@ from helpers import saveResultsARXMixture
 from scipy.io import loadmat
 
 data = loadmat("../data/eeg.mat")
-eegData = data['y'].flatten()[0::4]
-#eegData = (eegData - np.mean(eegData)) / np.sqrt(np.var(eegData))
-trainingData = eegData[:2000]
-evaluationData = eegData[2000:]
+eegData = data['y'].flatten()
+eegData = (eegData - np.mean(eegData)) / np.sqrt(np.var(eegData))
+trainingData = eegData[:8000]
+evaluationData = eegData[8000:]
 
 # Run Stan
 gridPoints = np.arange(-20, 20, 0.1)
@@ -25,6 +25,6 @@ data = {'noTrainingData': len(trainingData),
         }
 
 sm = pystan.StanModel(file='arx-gmmodel.stan')
-fit = sm.sampling(data=data, iter=1000, chains=1)
+fit = sm.sampling(data=data, iter=10000, chains=1)
 
-saveResultsARXMixture(data, model=fit, name='arxGaussianMixtureEEGData1')
+saveResultsARXMixture(data, model=fit, name='arxGaussianMixtureEEGData3')
