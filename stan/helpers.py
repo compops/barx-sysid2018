@@ -149,3 +149,42 @@ def saveResultsARXMixture(data, model, name):
 
     with open('example4_' + name + '.json', 'w') as f:
         json.dump(results, f, ensure_ascii=False)
+
+def saveResultsFIRMixture(data, model, name):
+
+    gridPoints = data['gridPoints']
+    trainingDataY = data['trainingDataY']
+    trainingDataX = data['trainingDataX']
+    evaluationDataY = data['evaluationDataY']
+    evaluationDataX = data['evaluationDataX']
+
+    kernelDensityEstimator = gaussian_kde(trainingDataY)
+    trueMixtureDensity = kernelDensityEstimator(gridPoints)
+    estMixtureDensity = np.mean(np.exp(model.extract("mixtureOnGrid")['mixtureOnGrid']), axis=0)
+    predictiveMeanTrace = model.extract("predictiveMean")['predictiveMean'][:, data['systemOrder']:]
+    predictiveMean = np.mean(predictiveMeanTrace, axis=0)
+    predictiveMeanVariance = np.var(predictiveMeanTrace, axis=0)
+    predictiveVariance = np.mean(model.extract("predictiveVariance")['predictiveVariance'][:, data['systemOrder']:], axis=0)
+
+    results = {}
+    results.update({'kernelDensityEstimate': trueMixtureDensity.tolist()})
+    results.update({'MCMCDensityEstimate': estMixtureDensity.tolist()})
+    results.update({'predictiveMean': predictiveMean.tolist()})
+    results.update({'predictiveMeanVariance': predictiveMeanVariance.tolist()})
+    results.update({'predictiveVariance': predictiveVariance.tolist()})
+    results.update({'filterCoefficient': model.extract("filterCoefficient")['filterCoefficient'].tolist()})
+    results.update({'mixtureWeightsPrior': model.extract("mixtureWeightsPrior")['mixtureWeightsPrior'].tolist()})
+    results.update({'filterCoefficientPrior': model.extract("filterCoefficientPrior")['filterCoefficientPrior'].tolist()})
+    results.update({'mixtureMeanPrior': model.extract("mixtureMeanPrior")['mixtureMeanPrior'].tolist()})
+    results.update({'mixtureWeights': model.extract("mixtureWeights")['mixtureWeights'].tolist()})
+    results.update({'mixtureMean': model.extract("mixtureMean")['mixtureMean'].tolist()})
+    results.update({'mixtureVariance': model.extract("mixtureVariance")['mixtureVariance'].tolist()})
+    results.update({'trainingDataX': trainingDataX.tolist()})
+    results.update({'trainingDataY': trainingDataY.tolist()})
+    results.update({'evaluationDataX': evaluationDataX.tolist()})
+    results.update({'evaluationDataY': evaluationDataY.tolist()})    
+    results.update({'gridPoints': gridPoints.tolist()})
+    results.update({'name': name})
+
+    with open('example3_' + name + '.json', 'w') as f:
+        json.dump(results, f, ensure_ascii=False)        

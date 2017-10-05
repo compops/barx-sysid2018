@@ -1,5 +1,5 @@
 data {
-  int<lower=1> maxLag;
+  int<lower=1> systemOrder;
 
   int<lower=1> noComponents;
   int<lower=1> noTrainingData;
@@ -8,13 +8,14 @@ data {
 
   real mixtureWeightsHyperPrior;
 
-  real trainingData[noTrainingData];
   real gridPoints[noGridPoints];
-  real evaluationData[noEvaluationData];
+  vector[noTrainingData] trainingDataY;
+  matrix[noTrainingData, systemOrder + 1] trainingDataX;
+  matrix[noEvaluationData, systemOrder + 1] evaluationDataX;
 }
 
 parameters {
-  vector<lower=-1, upper=1>[maxLag] filterCoefficient;
+  vector[systemOrder] filterCoefficient;
 
   simplex[noComponents] mixtureWeights;
   ordered[noComponents] mixtureMean;
@@ -28,7 +29,6 @@ parameters {
 model {
   vector[noComponents] mixtureWeightsPriorVector;
   real logPosteriorPerComponent[noComponents];
-  real autoRegressivePart;
 
   filterCoefficientPrior ~ cauchy(0, 1.0);
   filterCoefficient ~ normal(0, filterCoefficientPrior^2);
@@ -37,51 +37,34 @@ model {
   for (k in 1:noComponents)
         mixtureWeightsPriorVector[k] = mixtureWeightsPrior;
   mixtureWeights ~ dirichlet(mixtureWeightsPriorVector);
-  mixtureMeanPrior ~ cauchy(0, 5.0);
+
+  mixtureMeanPrior ~ cauchy(0, 1.0);
   mixtureMean ~ normal(0, mixtureMeanPrior^2);    
-  mixtureVariance ~ cauchy(0, 5.0);
+  mixtureVariance ~ cauchy(0, 1.0);
 
-  for (n in (maxLag+1):noTrainingData) {
-    autoRegressivePart = 0.0;
-
-    for (k in 1:maxLag)
-        autoRegressivePart = autoRegressivePart + filterCoefficient[k] * trainingData[n-k];
-         
-    for (k in 1:noComponents)
-        logPosteriorPerComponent[k] = log(mixtureWeights[k]) + normal_lpdf(trainingData[n] | mixtureMean[k] + autoRegressivePart, mixtureVariance[k]);
-    target += log_sum_exp(logPosteriorPerComponent);    
-  }
+for (k in 1:noComponents)
+    logPosteriorPerComponent[k] = log(mixtureWeights[k]) + normal_lpdf(trainingDataY | mixtureMean[k] + trainingDataX[:, 1] + trainingDataX[:, 2:] * filterCoefficient, mixtureVariance[k]);
+target += log_sum_exp(logPosteriorPerComponent);    
 }
 
 generated quantities {
     real mixtureOnGrid[noGridPoints];
     real logPosteriorPerComponent[noComponents];
-    real predictiveMean[noEvaluationData];
-    real predictiveVariance[noEvaluationData];
-    real autoRegressivePart;
+    vector[noEvaluationData] predictiveMean;
+    vector[noEvaluationData] predictiveVariance;
 
     for (n in 1:noGridPoints) {           
         for (k in 1:noComponents)
             logPosteriorPerComponent[k] = log(mixtureWeights[k]) + normal_lpdf(gridPoints[n] | mixtureMean[k], mixtureVariance[k]);
         mixtureOnGrid[n] = log_sum_exp(logPosteriorPerComponent);
     }
-
-    for(n in 1:(maxLag+1)) {
-        predictiveMean[n] = evaluationData[n];
-        predictiveVariance[n] = 0.0;
-    }
-
-    for (n in (maxLag+1):noEvaluationData) {
-        autoRegressivePart = 0.0;
-        for (k in 1:maxLag)
-            autoRegressivePart = autoRegressivePart + filterCoefficient[k] * evaluationData[n-k];
-        
+    for (n in 1:noEvaluationData) {
         predictiveMean[n] = 0.0;
         predictiveVariance[n] = 0.0;
-        for (k in 1:noComponents) {
-            predictiveMean[n] = predictiveMean[n] + mixtureWeights[k] * (mixtureMean[k] + autoRegressivePart);
-            predictiveVariance[n] = predictiveVariance[n] + mixtureWeights[k]^2 * mixtureVariance[k];
-        }
+    }
+    for (k in 1:noComponents) {
+        predictiveMean = predictiveMean + mixtureWeights[k] * (mixtureMean[k] + evaluationDataX[:, 1] + evaluationDataX[:, 2:] * filterCoefficient);
+        predictiveVariance = predictiveVariance + mixtureWeights[k]^2 * mixtureVariance[k];
     }
 }
 
