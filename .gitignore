@@ -2,6 +2,10 @@
 *.R~
 *.m~
 *.pyc
+*.json
+.Rhistory
+results-report/
+.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -74,7 +74,7 @@ generated quantities {
     for (n in (maxLag+1):noEvaluationData) {
         autoRegressivePart = 0.0;
         for (k in 1:maxLag)
-            autoRegressivePart = autoRegressivePart + filterCoefficient[k] * predictiveMean[n-k];
+            autoRegressivePart = autoRegressivePart + filterCoefficient[k] * evaluationData[n-k];
         
         predictiveMean[n] = 0.0;
         predictiveVariance[n] = 0.0;

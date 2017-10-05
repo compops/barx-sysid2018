@@ -17,7 +17,7 @@ data = {'noObservations': noObservations,
         'noGridPoints': noGridPoints, 
         'gridPoints': gridPoints}
 
-sm = pystan.StanModel(file='gmmodel2.stan')
+sm = pystan.StanModel(file='example2.stan')
 fit = sm.sampling(data=data, iter=10000, chains=1)
 
 # Plot and save to file

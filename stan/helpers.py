@@ -96,7 +96,7 @@ def saveResultsMixtures(gridPoints, observations, model, name):
     results.update({'gridPoints': gridPoints.tolist()})
     results.update({'name': name})
 
-    with open('output_' + name + '.json', 'w') as f:
+    with open('example2_' + name + '.json', 'w') as f:
         json.dump(results, f, ensure_ascii=False)
 
 
@@ -111,7 +111,7 @@ def saveResultsFIR(observations, inputs, model, name):
     results.update({'inputs': inputs.tolist()})
     results.update({'name': name})
 
-    with open('output_' + name + '.json', 'w') as f:
+    with open('example1_' + name + '.json', 'w') as f:
         json.dump(results, f, ensure_ascii=False)
 
     
@@ -147,5 +147,5 @@ def saveResultsARXMixture(data, model, name):
     results.update({'gridPoints': gridPoints.tolist()})
     results.update({'name': name})
 
-    with open('output_' + name + '.json', 'w') as f:
+    with open('example4_' + name + '.json', 'w') as f:
         json.dump(results, f, ensure_ascii=False)

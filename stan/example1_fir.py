@@ -36,7 +36,7 @@ yGuessedModelOrder = systemModel['output'][(modelOrderGuess-systemModel['order']
 
 # Run Stan
 data = {'noObservations': len(yGuessedModelOrder), 'systemOrder': modelOrderGuess, 'x': phiGuessedModelOrder, 'y': yGuessedModelOrder}
-sm = pystan.StanModel(file='firmodel.stan')
+sm = pystan.StanModel(file='example1.stan')
 fit = sm.sampling(data=data, iter=10000, chains=1)
 
 saveResultsFIR(systemModel['output'], systemModel['input'], fit, 'firOrderFiveGuessedTen')
