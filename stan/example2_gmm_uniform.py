@@ -21,6 +21,6 @@ sm = pystan.StanModel(file='example2.stan')
 fit = sm.sampling(data=data, iter=10000, chains=1)
 
 # Plot and save to file
-plotResults(fit, observations, gridPoints, 'uniform')
-saveResults(gridPoints, observations, fit, 'uniform')
+plotResultsMixtures(fit, observations, gridPoints, 'uniform')
+saveResultsMixtures(gridPoints, observations, fit, 'uniform')
 

@@ -7,7 +7,7 @@ from helpers import plotResultsMixtures, saveResultsMixtures
 
 # Generate data
 noObservations = 1000
-observations = randn_skew_fast(noObservations, -3, 0, 1)
+observations = randn_skew_fast(noObservations, -5, -1, 2)
 
 # Run Stan
 gridPoints = np.arange(-10, 10, 0.01)
@@ -23,5 +23,5 @@ sm = pystan.StanModel(file='example2.stan')
 fit = sm.sampling(data=data, iter=10000, chains=1)
 
 # Plot and save to file
-plotResults(fit, observations, gridPoints, 'skewed')
-saveResults(gridPoints, observations, fit, 'skewed')
+plotResultsMixtures(fit, observations, gridPoints, 'skewed')
+saveResultsMixtures(gridPoints, observations, fit, 'skewed')

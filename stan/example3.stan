@@ -23,7 +23,7 @@ parameters {
 
   real<lower=0> filterCoefficientPrior;
   real<lower=0> mixtureWeightsPrior;
-  real mixtureMeanPrior;
+  real<lower=0> mixtureMeanPrior;
 }
 
 model {
@@ -42,30 +42,33 @@ model {
   mixtureMean ~ normal(0, mixtureMeanPrior^2);    
   mixtureVariance ~ cauchy(0, 1.0);
 
-for (k in 1:noComponents)
-    logPosteriorPerComponent[k] = log(mixtureWeights[k]) + normal_lpdf(trainingDataY | mixtureMean[k] + trainingDataX[:, 1] + trainingDataX[:, 2:] * filterCoefficient, mixtureVariance[k]);
-target += log_sum_exp(logPosteriorPerComponent);    
+    for (k in 1:noComponents)
+        logPosteriorPerComponent[k] = log(mixtureWeights[k]) + normal_lpdf(trainingDataY | mixtureMean[k] + trainingDataX[:, 1] + trainingDataX[:, 2:] * filterCoefficient, mixtureVariance[k]);
+    target += log_sum_exp(logPosteriorPerComponent);
 }
 
 generated quantities {
-    real mixtureOnGrid[noGridPoints];
-    real logPosteriorPerComponent[noComponents];
+    vector[noGridPoints] mixtureOnGrid;
     vector[noEvaluationData] predictiveMean;
-    vector[noEvaluationData] predictiveVariance;
+    real predictiveVariance;
 
-    for (n in 1:noGridPoints) {           
-        for (k in 1:noComponents)
-            logPosteriorPerComponent[k] = log(mixtureWeights[k]) + normal_lpdf(gridPoints[n] | mixtureMean[k], mixtureVariance[k]);
-        mixtureOnGrid[n] = log_sum_exp(logPosteriorPerComponent);
-    }
-    for (n in 1:noEvaluationData) {
-        predictiveMean[n] = 0.0;
-        predictiveVariance[n] = 0.0;
-    }
+    for (n in 1:noGridPoints)   
+        mixtureOnGrid[n] = 0.0;    
+    
     for (k in 1:noComponents) {
-        predictiveMean = predictiveMean + mixtureWeights[k] * (mixtureMean[k] + evaluationDataX[:, 1] + evaluationDataX[:, 2:] * filterCoefficient);
-        predictiveVariance = predictiveVariance + mixtureWeights[k]^2 * mixtureVariance[k];
+        mixtureOnGrid = mixtureOnGrid + mixtureWeights[k] * exp(normal_lpdf(gridPoints | mixtureMean[k], mixtureVariance[k]));
     }
+    
+    for (n in 1:noEvaluationData)
+        predictiveMean[n] = 0.0;
+    
+    for (k in 1:noComponents)
+        predictiveMean = predictiveMean + mixtureWeights[k] * (mixtureMean[k] + evaluationDataX[:, 1] + evaluationDataX[:, 2:] * filterCoefficient);
+    
+    predictiveVariance = 0.0;
+    for (k in 1:noComponents) {
+        predictiveVariance = predictiveVariance + mixtureWeights[k]^2 * mixtureVariance[k];
+    }    
 }
 
 

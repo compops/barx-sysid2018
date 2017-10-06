@@ -22,5 +22,6 @@ sm = pystan.StanModel(file='example2.stan')
 fit = sm.sampling(data=data, iter=2000, chains=1)
 
 # Plot and save to file
-plotResults(fit, observations, gridPoints, 'heavytailed')
-saveResults(gridPoints, observations, fit, 'heavytailed')
+plotResultsMixtures(fit, observations, gridPoints, 'heavytailed')
+saveResultsMixtures(gridPoints, observations, fit, 'heavytailed')
+

@@ -22,7 +22,7 @@ parameters {
 
   real<lower=0> filterCoefficientPrior;
   real<lower=0> mixtureWeightsPrior;
-  real mixtureMeanPrior;
+  real<lower=0> mixtureMeanPrior;
 }
 
 model {

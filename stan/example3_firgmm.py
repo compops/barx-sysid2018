@@ -5,8 +5,8 @@ from helpers import saveResultsFIRMixture
 from helpers import buildPhiMatrix
 from helpers import randn_skew_fast
 
-noTrainingData = 1200
-noEvaluationData = 600
+noTrainingData = 2000
+noEvaluationData = 1000
 noObservations = noTrainingData + noEvaluationData
 modelOrder = 5
 
@@ -42,8 +42,8 @@ data = {'noTrainingData': noTrainingData,
         'trainingDataY': trainingDataY,
         'evaluationDataX': evaluationDataX,
         'evaluationDataY': evaluationDataY,
-        'noComponents': 5,
-        'mixtureWeightsHyperPrior': 5.0, 
+        'noComponents': 10,
+        'mixtureWeightsHyperPrior': 10.0, 
         'noGridPoints': noGridPoints, 
         'gridPoints': gridPoints,
         'systemOrder': 10
@@ -53,3 +53,4 @@ sm = pystan.StanModel(file='example3.stan')
 fit = sm.sampling(data=data, iter=10000, chains=1)
 
 saveResultsFIRMixture(data, model=fit, name='syntheticData')
+
