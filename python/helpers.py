@@ -160,11 +160,11 @@ def saveResultsFIRMixture(data, model, name):
 
     kernelDensityEstimator = gaussian_kde(trainingDataY)
     trueMixtureDensity = kernelDensityEstimator(gridPoints)
-    estMixtureDensity = np.mean(np.exp(model.extract("mixtureOnGrid")['mixtureOnGrid']), axis=0)
+    estMixtureDensity = np.mean(model.extract("mixtureOnGrid")['mixtureOnGrid'], axis=0)
     predictiveMeanTrace = model.extract("predictiveMean")['predictiveMean'][:, data['systemOrder']:]
     predictiveMean = np.mean(predictiveMeanTrace, axis=0)
     predictiveMeanVariance = np.var(predictiveMeanTrace, axis=0)
-    predictiveVariance = np.mean(model.extract("predictiveVariance")['predictiveVariance'][:, data['systemOrder']:], axis=0)
+    predictiveVariance = np.mean(model.extract("predictiveVariance")['predictiveVariance'])
 
     results = {}
     results.update({'kernelDensityEstimate': trueMixtureDensity.tolist()})
@@ -185,6 +185,21 @@ def saveResultsFIRMixture(data, model, name):
     results.update({'evaluationDataY': evaluationDataY.tolist()})    
     results.update({'gridPoints': gridPoints.tolist()})
     results.update({'name': name})
+    results.update({'inputSignal': data['inputSignal'].tolist()})
+    results.update({'outputSignal': data['outputSignal'].tolist()})
 
     with open('example3_' + name + '.json', 'w') as f:
         json.dump(results, f, ensure_ascii=False)        
+
+
+
+def generatePRBS(N, maxHold=10):
+    randomSignal = np.random.choice((-1, 1), N)
+    outputSignal = []
+
+    j = 0
+    while len(outputSignal) < N:
+        outputSignal.append(np.ones(1 + np.random.choice(maxHold)) * randomSignal[j])
+        j += 1
+
+    return(np.concatenate(outputSignal, axis=0)[:N])

@@ -40,7 +40,7 @@ model {
 
   mixtureMeanPrior ~ cauchy(0, 1.0);
   mixtureMean ~ normal(0, mixtureMeanPrior^2);    
-  mixtureVariance ~ cauchy(0, 1.0);
+  mixtureVariance ~ cauchy(0, 0.1);
 
     for (k in 1:noComponents)
         logPosteriorPerComponent[k] = log(mixtureWeights[k]) + normal_lpdf(trainingDataY | mixtureMean[k] + trainingDataX[:, 1] + trainingDataX[:, 2:] * filterCoefficient, mixtureVariance[k]);
@@ -53,11 +53,7 @@ generated quantities {
     real predictiveVariance;
 
     for (n in 1:noGridPoints)   
-        mixtureOnGrid[n] = 0.0;    
-    
-    for (k in 1:noComponents) {
-        mixtureOnGrid = mixtureOnGrid + mixtureWeights[k] * exp(normal_lpdf(gridPoints | mixtureMean[k], mixtureVariance[k]));
-    }
+        mixtureOnGrid[n] = sum(mixtureWeights * exp(normal_lpdf(gridPoints[n] | mixtureMean, mixtureVariance)));
     
     for (n in 1:noEvaluationData)
         predictiveMean[n] = 0.0;
