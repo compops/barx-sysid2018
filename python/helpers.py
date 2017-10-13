@@ -5,13 +5,18 @@ import seaborn as sns
 from palettable.colorbrewer.qualitative import Dark2_8
 from scipy.stats import gaussian_kde
 
-def buildPhiMatrix(data, order):
-    noObservations = len(data)
-    Phi = np.zeros((noObservations, order + 1))
-    for i in range(order, noObservations):
-        Phi[i, :] = data[range(i, i - order - 1, -1)]
-    return(Phi[order:, :])
-
+def buildPhiMatrix(observations, order, inputs = False):
+    noObservations = len(observations)
+    if isinstance(inputs, bool):
+        Phi = np.zeros((noObservations, order + 1))
+        for i in range(order, noObservations):
+            Phi[i, :] = observations[range(i, i - order - 1, -1)]
+        return Phi[order:, :]
+    else:
+        Phi = np.zeros((noObservations, order[0] + order[1]))
+        for i in range(int(np.max(order)), noObservations):
+            Phi[i, :] = np.hstack((-observations[range(i-1, i - order[0] - 1, -1)], inputs[range(i, i - order[1], -1)]))
+        return Phi[int(np.max(order)):, :]
 
 # From https://stackoverflow.com/questions/36200913/generate-n-random-numbers-from-a-skew-normal-distribution-using-numpy
 def randn_skew_fast(N, alpha=0.0, loc=0.0, scale=1.0):
@@ -114,7 +119,32 @@ def saveResultsFIR(observations, inputs, model, name):
     with open('example1_' + name + '.json', 'w') as f:
         json.dump(results, f, ensure_ascii=False)
 
-    
+def saveResultsChebyData(data, model, name, scaleModelCoefficients = True):
+
+    predictiveMeanTrace = model.extract("predictiveMean")['predictiveMean'][:, data['systemOrder']:]
+    predictiveMean = np.mean(predictiveMeanTrace, axis=0)
+    predictiveMeanVariance = np.var(predictiveMeanTrace, axis=0)
+
+    results = {}
+    results.update({'modelCoefficients': model.extract("modelCoefficients")['modelCoefficients'].tolist()})
+    results.update({'observationNoiseVariance': model.extract("observationNoiseVariance")['observationNoiseVariance'].tolist()})
+
+    if scaleModelCoefficients:
+        results.update({'scaleModelCoefficients': model.extract("scaleModelCoefficients")['scaleModelCoefficients'].tolist()})
+        
+    results.update({'predictiveMean': predictiveMean.tolist()})
+    results.update({'predictiveMeanVariance': predictiveMeanVariance.tolist()})
+    results.update({'trainingData': data['yEstimation'].tolist()})
+    results.update({'evaluationData': data['yValidation'].tolist()})
+    results.update({'trueOrder': np.array(data['trueOrder']).tolist()})    
+    results.update({'guessedOrder': np.array(data['guessedOrder']).tolist()})        
+    results.update({'coefficientsA': data['coefficientsA'].tolist()})
+    results.update({'coefficientsB': data['coefficientsB'].tolist()})
+    results.update({'name': name})
+
+    with open('example0_' + name + '.json', 'w') as f:
+        json.dump(results, f, ensure_ascii=False)
+
 def saveResultsARXMixture(data, model, name):
 
     gridPoints = data['gridPoints']
