@@ -3,60 +3,92 @@ import numpy as np
 import matplotlib.pylab as plt
 from helpers import saveResultsFIRMixture
 from helpers import buildPhiMatrix
-from helpers import randn_skew_fast
-from helpers import generatePRBS
+from scipy.io import loadmat
 
-noTrainingData = 3000
-noEvaluationData = 1500
-noObservations = noTrainingData + noEvaluationData
-modelOrder = 3
-#inputSignal = generatePRBS(noObservations, maxHold=20)
-inputSignal = np.random.normal(size=noObservations)
-filterCoefficients = (1.0, -0.71, -0.38, 0.17)
+# Get data
+data = loadmat("../matlab/chebyData.mat")
+coefficientsA = data['a'].flatten()
+coefficientsB = data['b'].flatten()
+observations = data['dataOutNoisy'].flatten()
+inputs = data['dataIn'].flatten()
+order = (len(coefficientsA) - 1, len(coefficientsB))
 
-# Generate data
-phi = buildPhiMatrix(inputSignal, modelOrder)
-outputSignal = np.dot(phi, filterCoefficients)
-idx = np.where(np.random.choice(2, noObservations - modelOrder, p=(0.7, 0.3)) == 0)
-noise1 = randn_skew_fast(noObservations - modelOrder, -5, 0, 0.5)
-noise2 = np.random.normal(6, 0.5, size=noObservations - modelOrder)
-noise = noise2
-noise[idx] = noise1[idx]
-outputSignal += noise
+noObservations = observations.shape[0]
+noEstimationData = int(np.floor(noObservations * 0.67))
+noValidationData = int(noObservations - noEstimationData)
 
-# Build Phi matrix
-modelOrderGuess = modelOrder
-dataX = buildPhiMatrix(inputSignal, modelOrderGuess)
-dataY = outputSignal[(modelOrderGuess - modelOrder):]
+estimationObservations = observations[:noEstimationData]
+estimationInputs = inputs[:noEstimationData]
 
-trainingDataX = dataX[0:noTrainingData, :]
-trainingDataY = dataY[0:noTrainingData]
-evaluationDataX = dataX[noTrainingData:noObservations, :]
-evaluationDataY = dataY[noTrainingData:noObservations]
-print(filterCoefficients)
-print(np.linalg.lstsq(trainingDataX, trainingDataY)[0])
+validationObservations = observations[noEstimationData:]
+validationInputs = inputs[noEstimationData:]
+
+# Build regressor matrices
+guessedOrder = (4, 5)
+regressorMatrixEstimation = buildPhiMatrix(estimationObservations, guessedOrder, estimationInputs)
+yEstimation = estimationObservations[int(np.max(guessedOrder)):]
+regressorMatrixValidation = buildPhiMatrix(validationObservations, guessedOrder, validationInputs)
+yValidation = validationObservations[int(np.max(guessedOrder)):]
 
 # Run Stan
-gridPoints = np.arange(-10, 10, 0.05)
+gridPoints = np.arange(-10, 30, 0.1)
 noGridPoints = len(gridPoints)
-data = {'noTrainingData': noTrainingData,
-        'noEvaluationData': noEvaluationData - modelOrderGuess,
-        'trainingDataX': trainingDataX,
-        'trainingDataY': trainingDataY,
-        'evaluationDataX': evaluationDataX,
-        'evaluationDataY': evaluationDataY,
-        'noComponents': 10,
+data = {'noEstimationData': len(yEstimation), 
+        'noValidationData': len(yValidation), 
+        'systemOrder': int(np.sum(guessedOrder)),
+        'regressorMatrixEstimation': regressorMatrixEstimation, 
+        'regressorMatrixValidation': regressorMatrixValidation, 
+        'yEstimation': yEstimation,
+        'yValidation': yValidation,
+        'noComponents': 2,
         'mixtureWeightsHyperPrior': 10.0, 
         'noGridPoints': noGridPoints, 
-        'gridPoints': gridPoints,
-        'systemOrder': modelOrderGuess,
-        'inputSignal': inputSignal,
-        'outputSignal': outputSignal
+        'gridPoints': gridPoints,         
+        'trueOrder': order,
+        'guessedOrder': guessedOrder,
+        'coefficientsA': coefficientsA,
+        'coefficientsB': coefficientsB,
+        'observations': observations,
+        'inputs': inputs,
+        'noIterations': 10000,
+        'noChains': 1        
 }
 
-sm = pystan.StanModel(file='example3.stan')
-fit = sm.sampling(data=data, iter=10000, chains=1)
+sm = pystan.StanModel(file='example3version3.stan')
+fit = sm.sampling(data=data, iter=data['noIterations'], chains=data['noChains'])
 
-saveResultsFIRMixture(data, model=fit, name='syntheticData')
+model=fit
+name='syntheticData'
+
+import json
+
+predictiveMean = np.mean(model.extract("predictiveMean")['predictiveMean'], axis=0)
+predictiveVariance = np.mean(model.extract("predictiveVariance")['predictiveVariance'], axis=0)
+
+results = {}
+results.update({'name': name})
+results.update({'noIterations': data['noIterations']})
+results.update({'noChains': data['noChains']})
+
+results.update({'predictiveMean': predictiveMean.tolist()})
+results.update({'predictiveVariance': predictiveVariance.tolist()})
+results.update({'modelCoefficients': model.extract("modelCoefficients")['modelCoefficients'].tolist()})
+results.update({'modelCoefficientsPrior': model.extract("modelCoefficientsPrior")['modelCoefficientsPrior'].tolist()})
+results.update({'observationNoiseVariance': model.extract("observationNoiseVariance")['observationNoiseVariance'].tolist()})
+
+results.update({'yValidation': data['yValidation'].tolist()})
+results.update({'yEstimation': data['yEstimation'].tolist()})
+results.update({'regressorMatrixEstimation': data['regressorMatrixEstimation'].tolist()})
+results.update({'regressorMatrixValidation': data['regressorMatrixValidation'].tolist()})    
+results.update({'inputSignal': data['inputs'].tolist()})
+results.update({'outputSignal': data['observations'].tolist()})
+results.update({'trueOrder': np.array(data['trueOrder']).tolist()})    
+results.update({'guessedOrder': np.array(data['guessedOrder']).tolist()})        
+results.update({'coefficientsA': data['coefficientsA'].tolist()})
+results.update({'coefficientsB': data['coefficientsB'].tolist()})
+
+with open('example3_' + name + '.json', 'w') as f:
+        json.dump(results, f, ensure_ascii=False)        
+
 
 

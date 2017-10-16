@@ -4,6 +4,7 @@ import matplotlib.pylab as plt
 from helpers import buildPhiMatrix, saveResultsChebyData
 from scipy.io import loadmat
 
+# Get data
 data = loadmat("../matlab/chebyData.mat")
 coefficientsA = data['a'].flatten()
 coefficientsB = data['b'].flatten()
@@ -23,7 +24,7 @@ estimationInputs = inputs[:noEstimationData]
 validationObservations = observations[noEstimationData:]
 validationInputs = inputs[noEstimationData:]
 
-# Generate data
+# Build regressor matrices
 guessedOrder = (9, 10)
 regressorMatrixEstimation = buildPhiMatrix(estimationObservations, guessedOrder, estimationInputs)
 yEstimation = estimationObservations[int(np.max(guessedOrder)):]
