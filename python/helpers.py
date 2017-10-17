@@ -5,6 +5,23 @@ import seaborn as sns
 from palettable.colorbrewer.qualitative import Dark2_8
 from scipy.stats import gaussian_kde
 
+def initialiseMixtureMeans():
+    order = 9
+    noComp = 5
+    datarange = (-2.5955031454050141, 12.214990401183739)
+    mixtureMeans = np.sort(np.random.uniform(low=datarange[0], high=datarange[1], size=noComp))
+
+    output = dict( modelCoefficients=np.zeros(order),
+                   modelCoefficientsPrior=1.0,
+                   observationNoiseVariance=1.0,
+                   mixtureWeights=np.ones(noComp) / noComp,
+                   mixtureMeans=mixtureMeans,
+                   mixtureMeansPrior = 1.0,
+                   mixtureWeightsPrior = 1.0
+                )
+    
+    return output
+
 def buildPhiMatrix(observations, order, inputs = False):
     noObservations = len(observations)
     if isinstance(inputs, bool):

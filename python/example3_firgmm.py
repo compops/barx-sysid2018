@@ -2,7 +2,7 @@ import pystan
 import numpy as np
 import matplotlib.pylab as plt
 from helpers import saveResultsFIRMixture
-from helpers import buildPhiMatrix
+from helpers import buildPhiMatrix, initialiseMixtureMeans
 from scipy.io import loadmat
 
 # Get data
@@ -33,48 +33,55 @@ yValidation = validationObservations[int(np.max(guessedOrder)):]
 # Run Stan
 gridPoints = np.arange(-10, 30, 0.1)
 noGridPoints = len(gridPoints)
+
 data = {'noEstimationData': len(yEstimation), 
         'noValidationData': len(yValidation), 
         'systemOrder': int(np.sum(guessedOrder)),
+
         'regressorMatrixEstimation': regressorMatrixEstimation, 
         'regressorMatrixValidation': regressorMatrixValidation, 
         'yEstimation': yEstimation,
         'yValidation': yValidation,
-        'noComponents': 2,
+
+        'noComponents': 5,
         'mixtureWeightsHyperPrior': 10.0, 
         'noGridPoints': noGridPoints, 
-        'gridPoints': gridPoints,         
+        'gridPoints': gridPoints,  
+
         'trueOrder': order,
         'guessedOrder': guessedOrder,
         'coefficientsA': coefficientsA,
         'coefficientsB': coefficientsB,
         'observations': observations,
         'inputs': inputs,
+
         'noIterations': 10000,
         'noChains': 1        
 }
 
-sm = pystan.StanModel(file='example3version3.stan')
-fit = sm.sampling(data=data, iter=data['noIterations'], chains=data['noChains'])
+sm = pystan.StanModel(file='example3version4.stan')
+fit = sm.sampling(data=data, iter=data['noIterations'], chains=data['noChains'], init=initialiseMixtureMeans)
 
 model=fit
 name='syntheticData'
 
 import json
-
-predictiveMean = np.mean(model.extract("predictiveMean")['predictiveMean'], axis=0)
-predictiveVariance = np.mean(model.extract("predictiveVariance")['predictiveVariance'], axis=0)
-
 results = {}
 results.update({'name': name})
 results.update({'noIterations': data['noIterations']})
 results.update({'noChains': data['noChains']})
 
-results.update({'predictiveMean': predictiveMean.tolist()})
-results.update({'predictiveVariance': predictiveVariance.tolist()})
 results.update({'modelCoefficients': model.extract("modelCoefficients")['modelCoefficients'].tolist()})
 results.update({'modelCoefficientsPrior': model.extract("modelCoefficientsPrior")['modelCoefficientsPrior'].tolist()})
 results.update({'observationNoiseVariance': model.extract("observationNoiseVariance")['observationNoiseVariance'].tolist()})
+
+results.update({'mixtureWeights': model.extract("mixtureWeights")['mixtureWeights'].tolist()})
+results.update({'mixtureWeightsPrior': model.extract("mixtureWeightsPrior")['mixtureWeightsPrior'].tolist()})
+results.update({'mixtureMeans': model.extract("mixtureMeans")['mixtureMeans'].tolist()})
+results.update({'mixtureMeansPrior': model.extract("mixtureMeansPrior")['mixtureMeansPrior'].tolist()})
+
+results.update({'predictiveMean': model.extract("predictiveMean")['predictiveMean'].tolist()})
+results.update({'predictiveVariance': model.extract("predictiveVariance")['predictiveVariance'].tolist()})
 
 results.update({'yValidation': data['yValidation'].tolist()})
 results.update({'yEstimation': data['yEstimation'].tolist()})
@@ -86,6 +93,7 @@ results.update({'trueOrder': np.array(data['trueOrder']).tolist()})
 results.update({'guessedOrder': np.array(data['guessedOrder']).tolist()})        
 results.update({'coefficientsA': data['coefficientsA'].tolist()})
 results.update({'coefficientsB': data['coefficientsB'].tolist()})
+results.update({'gridPoints': data['gridPoints'].tolist()})
 
 with open('example3_' + name + '.json', 'w') as f:
         json.dump(results, f, ensure_ascii=False)        

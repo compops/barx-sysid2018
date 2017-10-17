@@ -37,7 +37,7 @@ norm(res3.A - a)
 norm(res3.B - b)
 
 % Gaussian mixture
-obj = gmdistribution([0; 10; ], cat(3, [0.5], [0.5]), [0.8, 0.2]);
+obj = gmdistribution([0; 20], cat(3, [0.5], [0.5]), [0.8, 0.2]);
 res4 = arx(iddata(outputEstimation + random(obj, 1000), inputEstimation),[4 5 0]);
 prediction4 = predict(res4, iddata(outputValidation, inputValidation));
 squaredPE4 = sum((prediction4.OutputData - outputValidation).^2);
