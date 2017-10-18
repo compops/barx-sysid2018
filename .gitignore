@@ -6,6 +6,8 @@
 .Rhistory
 results-report/
 .json
+*.pdf
+.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
