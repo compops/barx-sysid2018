@@ -16,7 +16,7 @@ noise = noise2;
 noise(indicator == 1) = noise1(indicator == 1);
 dataOutNoisy = dataOut + noise;
 
-%save('chebyData.mat', 'dataIn', 'dataOutNoisy', 'a', 'b', '-v4')
+%save('../data/example1-arxgmm.mat', 'dataIn', 'dataOutNoisy', 'a', 'b', '-v4')
 
 %% Oracle
 noise3 = noise;
