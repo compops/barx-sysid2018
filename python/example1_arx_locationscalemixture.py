@@ -47,7 +47,7 @@ data = {'noEstimationData': len(yEstimation),
         'mixtureWeightsHyperPrior': 10.0, 
         'noGridPoints': noGridPoints, 
         'gridPoints': gridPoints,  
-example3_
+        
         'trueOrder': order,
         'guessedOrder': guessedOrder,
         'coefficientsA': coefficientsA,

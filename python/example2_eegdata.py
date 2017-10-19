@@ -27,7 +27,7 @@ regressorMatrixValidation = regressorMatrixValidation[:, 1:]
 yValidation = validationObservations[int(np.max(guessedOrder)):]
 
 # Run Stan
-gridPoints = np.arange(-4, 4, 0.01)
+gridPoints = np.arange(-2, 2, 0.01)
 noGridPoints = len(gridPoints)
 
 data = {'noEstimationData': len(yEstimation), 

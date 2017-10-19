@@ -38,7 +38,7 @@ model {
   mixtureMeans ~ normal(0, mixtureMeansPrior^2);
   mixtureVariances ~ cauchy(0, 5.0);
   
-  modelCoefficientsPrior ~ cauchy(0, 5.0);
+  modelCoefficientsPrior ~ cauchy(0, 1.0);
   modelCoefficients ~ normal(0, modelCoefficientsPrior^2);
 
   for (n in 1:noEstimationData) {

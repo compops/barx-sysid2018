@@ -3,7 +3,7 @@ maxOrder = 10;
 
 %% Downsample and partition data
 y = y(1:4:end);
-%y = (y - mean(y)) / sqrt(var((y)));
+y = (y - mean(y)) / sqrt(var((y)));
 
 trainingData = y(1:1200);
 evaluationData = y(1201:2000);
