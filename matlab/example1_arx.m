@@ -10,25 +10,19 @@ dataIn = randn(noObservations, 1);
 dataOut = filter(b, a, dataIn);
 
 indicator = randsample(2, noObservations, true, [0.2 0.8]);
-noise1 = 10 + 0.50 * randn(noObservations, 1);
-noise2 = 0  + 0.50 * randn(noObservations, 1);
-noise = noise2;
-noise(indicator == 1) = noise1(indicator == 1);
+noise = 0.5 * randn(noObservations, 1);
 dataOutNoisy = dataOut + noise;
 
-%save('../data/example1-arxgmm.mat', 'dataIn', 'dataOutNoisy', 'a', 'b', '-v4')
+save('../data/example1-arx.mat', 'dataIn', 'dataOutNoisy', 'a', 'b', '-v4')
 
 %% Oracle
-noise3 = noise;
-noise3(indicator == 1) = noise3(indicator == 1) - 10;
-oracleOutput = dataOut + noise3;
+oracleOutput = dataOut + noise;
 
-oracleEstimationData = iddata(oracleOutput(1:noEstimationData), dataIn(1:noEstimationData));
-oracleValidationData = iddata(oracleOutput(noEstimationData:end), dataIn(noEstimationData:end));
+oracleEstimationData = iddata(dataOutNoisy(1:noEstimationData), dataIn(1:noEstimationData));
+oracleValidationData = iddata(dataOutNoisy(noEstimationData:end), dataIn(noEstimationData:end));
 res1 = arx(oracleEstimationData,[4 5 0]);
 pre1 = predict(res1, oracleValidationData);
 pre1 = pre1.OutputData;
-pre1(indicator(noEstimationData:end) == 1) = pre1(indicator(noEstimationData:end) == 1) + 10;
 
 res1.A
 res1.B

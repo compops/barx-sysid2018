@@ -6,7 +6,7 @@ from helpers import buildPhiMatrix
 from scipy.io import loadmat
 
 # Get data
-data = loadmat("../data/example1-arxgmm.mat")
+data = loadmat("../data/example1-arx.mat")
 coefficientsA = data['a'].flatten()
 coefficientsB = data['b'].flatten()
 observations = data['dataOutNoisy'].flatten()
@@ -34,20 +34,20 @@ yValidation = validationObservations[int(np.max(guessedOrder)):]
 gridPoints = np.arange(-10, 30, 0.1)
 noGridPoints = len(gridPoints)
 
-data = {'noEstimationData': len(yEstimation), 
-        'noValidationData': len(yValidation), 
+data = {'noEstimationData': len(yEstimation),
+        'noValidationData': len(yValidation),
         'systemOrder': int(np.sum(guessedOrder)),
 
-        'regressorMatrixEstimation': regressorMatrixEstimation, 
-        'regressorMatrixValidation': regressorMatrixValidation, 
+        'regressorMatrixEstimation': regressorMatrixEstimation,
+        'regressorMatrixValidation': regressorMatrixValidation,
         'yEstimation': yEstimation,
         'yValidation': yValidation,
 
         'noComponents': 5,
-        'mixtureWeightsHyperPrior': 10.0, 
-        'noGridPoints': noGridPoints, 
-        'gridPoints': gridPoints,  
-        
+        'mixtureWeightsHyperPrior': 10.0,
+        'noGridPoints': noGridPoints,
+        'gridPoints': gridPoints,
+
         'trueOrder': order,
         'guessedOrder': guessedOrder,
         'coefficientsA': coefficientsA,
@@ -56,14 +56,14 @@ data = {'noEstimationData': len(yEstimation),
         'inputs': inputs,
 
         'noIterations': 10000,
-        'noChains': 1        
+        'noChains': 1
 }
 
-sm = pystan.StanModel(file='example1_arx_locationscalemixture.stan')
+sm = pystan.StanModel(file='arx_locationscalemixture.stan')
 fit = sm.sampling(data=data, iter=data['noIterations'], chains=data['noChains'], init=initialiseARXlocationScaleMixture)
 
 model = fit
-name = 'example1_arx_locationscalemixture'
+name = 'example1_arx'
 
 import json
 results = {}
@@ -86,17 +86,17 @@ results.update({'predictiveVariance': model.extract("predictiveVariance")['predi
 results.update({'yValidation': data['yValidation'].tolist()})
 results.update({'yEstimation': data['yEstimation'].tolist()})
 results.update({'regressorMatrixEstimation': data['regressorMatrixEstimation'].tolist()})
-results.update({'regressorMatrixValidation': data['regressorMatrixValidation'].tolist()})    
+results.update({'regressorMatrixValidation': data['regressorMatrixValidation'].tolist()})
 results.update({'inputSignal': data['inputs'].tolist()})
 results.update({'outputSignal': data['observations'].tolist()})
-results.update({'trueOrder': np.array(data['trueOrder']).tolist()})    
-results.update({'guessedOrder': np.array(data['guessedOrder']).tolist()})        
+results.update({'trueOrder': np.array(data['trueOrder']).tolist()})
+results.update({'guessedOrder': np.array(data['guessedOrder']).tolist()})
 results.update({'coefficientsA': data['coefficientsA'].tolist()})
 results.update({'coefficientsB': data['coefficientsB'].tolist()})
 results.update({'gridPoints': data['gridPoints'].tolist()})
 
 with open(name + '.json', 'w') as f:
-        json.dump(results, f, ensure_ascii=False)        
+        json.dump(results, f, ensure_ascii=False)
 
 
 
