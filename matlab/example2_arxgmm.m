@@ -16,7 +16,7 @@ noise = noise2;
 noise(indicator == 1) = noise1(indicator == 1);
 dataOutNoisy = dataOut + noise;
 
-save('../data/example2-arxgmm.mat', 'dataIn', 'dataOutNoisy', 'a', 'b', '-v4')
+%save('../data/example2-arxgmm.mat', 'dataIn', 'dataOutNoisy', 'a', 'b', '-v4')
 
 %% Oracle
 noise3 = noise;
