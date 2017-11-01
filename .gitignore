@@ -5,6 +5,8 @@ pystan
 .pickle
 *.json
 *.pickle
+*workspace.mat
+workspace.mat
 
 .vscode/
 *.R~
