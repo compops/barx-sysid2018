@@ -6,6 +6,7 @@ from scipy.stats import norm
 from python.helpers import init_random_data
 from python.helpers import write_results_to_json
 from python.helpers import ensure_dir
+from python.helpers import randn_skew_fast
 
 def run(no_obs=100):
     """Executes the experiment."""
@@ -53,7 +54,7 @@ def run(no_obs=100):
                 'no_chains': 4
                 }
 
-        model = pystan.StanModel(file='gmm.stan')
+        model = pystan.StanModel(file='python/gmm.stan')
         fit = model.sampling(data=data,
                             iter=data['no_iterations'],
                             chains=data['no_chains'],
@@ -61,7 +62,7 @@ def run(no_obs=100):
                             seed=644461351)
 
         # Save results to file
-        file_name = '../results/' + "illustration_gmm_" + name + ".pickle"
+        file_name = 'results/' + "illustration_gmm_" + name + ".pickle"
         ensure_dir(file_name)
         with open(file_name, "wb") as f:
             pickle.dump({'model': model, 'fit': fit}, f, protocol=-1)

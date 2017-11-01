@@ -134,7 +134,7 @@ def write_results_to_json(name, data, fit):
         if isinstance(results[key], np.ndarray):
             results[key] = results[key].tolist()
 
-    file_name = '../results/' + name + '.json'
+    file_name = 'results/' + name + '.json'
     ensure_dir(file_name)
     with open(file_name, 'w') as f:
             json.dump(results, f, ensure_ascii=False)

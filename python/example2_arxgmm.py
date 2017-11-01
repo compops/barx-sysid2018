@@ -11,7 +11,7 @@ from scipy.io import loadmat
 def run():
     """Executes the experiment."""
     # Get data
-    data = loadmat("../data/example2_arxgmm.mat")
+    data = loadmat("data/example2_arxgmm.mat")
     coefs_a = data['a'].flatten()
     coefs_b = data['b'].flatten()
     obs = data['dataOutNoisy'].flatten()
@@ -65,7 +65,7 @@ def run():
             'no_chains': 4
     }
 
-    model = pystan.StanModel(file='barx_gmm.stan')
+    model = pystan.StanModel(file='python/barx_gmm.stan')
     fit = model.sampling(data=data,
                         iter=data['no_iterations'],
                         chains=data['no_chains'],
@@ -74,7 +74,7 @@ def run():
                         seed=644461351)
 
     # Save results to file
-    file_name = "../results/example2_arx_gmm.pickle"
+    file_name = "results/example2_arx_gmm.pickle"
     ensure_dir(file_name)
     with open(file_name, "wb") as f:
         pickle.dump({'model' : model, 'fit' : fit}, f, protocol=-1)

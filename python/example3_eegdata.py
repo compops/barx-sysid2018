@@ -11,7 +11,7 @@ from scipy.io import loadmat
 def run():
     """Executes the experiment."""
     # Get data
-    data = loadmat("../data/example3_eegdata.mat")
+    data = loadmat("data/example3_eegdata.mat")
     obs = data['y'].flatten()[0::4]
     obs = (obs - np.mean(obs)) / np.sqrt(np.var(obs))
 
@@ -57,7 +57,7 @@ def run():
             'no_chains': 4
     }
 
-    model = pystan.StanModel(file='barx_gmm.stan')
+    model = pystan.StanModel(file='python/barx_gmm.stan')
     fit = model.sampling(data=data,
                         iter=data['no_iterations'],
                         chains=data['no_chains'],
@@ -66,7 +66,7 @@ def run():
                         seed=644461351)
 
     # Save results to file
-    file_name = "../results/example3_eegdata.pickle"
+    file_name = "results/example3_eegdata.pickle"
     ensure_dir(file_name)
     with open(file_name, "wb") as f:
         pickle.dump({'model' : model, 'fit' : fit}, f, protocol=-1)
