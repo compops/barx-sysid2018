@@ -1,90 +1,67 @@
+import pickle
 import pystan
 import numpy as np
-import matplotlib.pylab as plt
-from helpers import buildPhiMatrix
-from initialisation import initialiseARXModelEEGData
+from helpers import build_phi_matrix, init_eegdata, write_results_to_json
+from helpers import ensure_dir
 from scipy.io import loadmat
 
 # Get data
-data = loadmat("../data/eeg.mat")
-observations = data['y'].flatten()[0::4]
-observations = (observations - np.mean(observations)) / np.sqrt(np.var(observations))
+data = loadmat("../data/example3_eegdata.mat")
+obs = data['y'].flatten()[0::4]
+obs = (obs - np.mean(obs)) / np.sqrt(np.var(obs))
 
-noObservations = observations.shape[0]
-noEstimationData = 2000
-noValidationData = int(noObservations - noEstimationData)
+no_obs = obs.shape[0]
+no_est_data = 2000
+no_val_data = int(no_obs - no_est_data)
 
-estimationObservations = observations[:noEstimationData]
-validationObservations = observations[noEstimationData:]
+est_obs = obs[:no_est_data]
+val_obs = obs[no_est_data:]
 
 # Build regressor matrices
-guessedOrder = 10
-regressorMatrixEstimation = buildPhiMatrix(estimationObservations, guessedOrder)
-regressorMatrixEstimation = regressorMatrixEstimation[:, 1:]
-yEstimation = estimationObservations[int(np.max(guessedOrder)):]
-regressorMatrixValidation = buildPhiMatrix(validationObservations, guessedOrder)
-regressorMatrixValidation = regressorMatrixValidation[:, 1:]
-yValidation = validationObservations[int(np.max(guessedOrder)):]
+order_guess = 10
+est_data_matrix = build_phi_matrix(est_obs, order_guess)
+est_data_matrix = est_data_matrix[:, 1:]
+y_est = est_obs[int(np.max(order_guess)):]
+val_data_matrix = build_phi_matrix(val_obs, order_guess)
+val_data_matrix = val_data_matrix[:, 1:]
+y_val = val_obs[int(np.max(order_guess)):]
 
 # Run Stan
-gridPoints = np.arange(-2, 2, 0.01)
-noGridPoints = len(gridPoints)
+grid_points = np.arange(-2, 2, 0.01)
+no_grid_points = len(grid_points)
 
-data = {'noEstimationData': len(yEstimation),
-        'noValidationData': len(yValidation),
-        'systemOrder': int(np.sum(guessedOrder)),
+data = {'no_est_data': len(y_est),
+        'no_val_data': len(y_val),
+        'systemOrder': int(np.sum(order_guess)),
 
-        'regressorMatrixEstimation': regressorMatrixEstimation,
-        'regressorMatrixValidation': regressorMatrixValidation,
-        'yEstimation': yEstimation,
-        'yValidation': yValidation,
+        'est_data_matrix': est_data_matrix,
+        'val_data_matrix': val_data_matrix,
+        'y_est': y_est,
+        'y_val': y_val,
 
-        'noComponents': 5,
-        'mixtureWeightsHyperPrior': 10.0,
-        'noGridPoints': noGridPoints,
-        'gridPoints': gridPoints,
+        'no_comp': 5,
+        'mix_weight_hyperprior': 10.0,
+        'no_grid_points': no_grid_points,
+        'grid_points': grid_points,
 
-        'guessedOrder': guessedOrder,
-        'observations': observations,
+        'order_guess': order_guess,
+        'sys_order': np.sum(order_guess),
+        'obs': obs,
 
-        'noIterations': 10000,
-        'noChains': 1
+        'no_iterations': 10000,
+        'no_chains': 4
 }
 
-sm = pystan.StanModel(file='arx_locationscalemixture.stan')
-fit = sm.sampling(data=data, iter=data['noIterations'], chains=data['noChains'], init=initialiseARXModelEEGData)
+model = pystan.StanModel(file='barx_gmm.stan')
+fit = model.sampling(data=data,
+                     iter=data['no_iterations'],
+                     chains=data['no_chains'],
+                     init=init_eegdata,
+                     n_jobs=4)
 
-model = fit
-name = 'example3_eegdata'
-
-import json
-results = {}
-results.update({'name': name})
-results.update({'noIterations': data['noIterations']})
-results.update({'noChains': data['noChains']})
-
-results.update({'modelCoefficients': model.extract("modelCoefficients")['modelCoefficients'].tolist()})
-results.update({'modelCoefficientsPrior': model.extract("modelCoefficientsPrior")['modelCoefficientsPrior'].tolist()})
-
-results.update({'mixtureWeights': model.extract("mixtureWeights")['mixtureWeights'].tolist()})
-results.update({'mixtureWeightsPrior': model.extract("mixtureWeightsPrior")['mixtureWeightsPrior'].tolist()})
-results.update({'mixtureMeans': model.extract("mixtureMeans")['mixtureMeans'].tolist()})
-results.update({'mixtureMeansPrior': model.extract("mixtureMeansPrior")['mixtureMeansPrior'].tolist()})
-results.update({'mixtureVariances': model.extract("mixtureVariances")['mixtureVariances'].tolist()})
-
-results.update({'predictiveMean': model.extract("predictiveMean")['predictiveMean'].tolist()})
-results.update({'predictiveVariance': model.extract("predictiveVariance")['predictiveVariance'].tolist()})
-
-results.update({'yValidation': data['yValidation'].tolist()})
-results.update({'yEstimation': data['yEstimation'].tolist()})
-results.update({'regressorMatrixEstimation': data['regressorMatrixEstimation'].tolist()})
-results.update({'regressorMatrixValidation': data['regressorMatrixValidation'].tolist()})
-results.update({'outputSignal': data['observations'].tolist()})
-results.update({'guessedOrder': np.array(data['guessedOrder']).tolist()})
-results.update({'gridPoints': data['gridPoints'].tolist()})
-
-with open(name + '.json', 'w') as f:
-        json.dump(results, f, ensure_ascii=False)
-
-
-
+# Save results to file
+file_name = "../results/example3_eegdata.pickle"
+ensure_dir(file_name)
+with open(file_name, "wb") as f:
+    pickle.dump({'model' : model, 'fit' : fit}, f, protocol=-1)
+write_results_to_json('example3_eegdata', data, fit)

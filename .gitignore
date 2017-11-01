@@ -1,3 +1,11 @@
+results/
+result/
+pystan
+.json
+.pickle
+*.json
+*.pickle
+
 .vscode/
 *.R~
 *.m~
