@@ -1,0 +1,5 @@
+results/*
+*.pickle
+*.json
+__pycache__/
+__pycache__

@@ -1,4 +1,4 @@
-"""Estimates a model using data from an ARX model with Gaussian noise."""
+"""Estimates a model using data from an ARX model with Gaussian mixture noise."""
 import pickle
 import pystan
 import numpy as np
@@ -11,7 +11,7 @@ from scipy.io import loadmat
 def run():
     """Executes the experiment."""
     # Get data
-    data = loadmat("../data/example1_arx.mat")
+    data = loadmat("../data/example2_arxgmm.mat")
     coefs_a = data['a'].flatten()
     coefs_b = data['b'].flatten()
     obs = data['dataOutNoisy'].flatten()
@@ -74,8 +74,8 @@ def run():
                         seed=644461351)
 
     # Save results to file
-    file_name = "../results/example1_arx.pickle"
+    file_name = "../results/example2_arx_gmm.pickle"
     ensure_dir(file_name)
     with open(file_name, "wb") as f:
         pickle.dump({'model' : model, 'fit' : fit}, f, protocol=-1)
-    write_results_to_json('example1_arx', data, fit)
+    write_results_to_json('example2_arx_gmm', data, fit)
