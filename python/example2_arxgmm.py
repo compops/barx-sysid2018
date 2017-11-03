@@ -62,7 +62,7 @@ def run():
             'inputs': inputs,
 
             'no_iterations': 10000,
-            'no_chains': 4
+            'no_chains': 1
     }
 
     model = pystan.StanModel(file='python/barx_gmm.stan')
@@ -70,7 +70,6 @@ def run():
                         iter=data['no_iterations'],
                         chains=data['no_chains'],
                         init=init_random_data,
-                        n_jobs=4,
                         seed=644461351)
 
     # Save results to file

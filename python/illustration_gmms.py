@@ -51,14 +51,13 @@ def run(no_obs=100):
                 'no_grid_points': no_grid_points,
                 'grid_points': grid_points,
                 'no_iterations': 10000,
-                'no_chains': 4
+                'no_chains': 1
                 }
 
         model = pystan.StanModel(file='python/gmm.stan')
         fit = model.sampling(data=data,
                             iter=data['no_iterations'],
                             chains=data['no_chains'],
-                            n_jobs=4,
                             seed=644461351)
 
         # Save results to file

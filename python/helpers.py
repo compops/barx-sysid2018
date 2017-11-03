@@ -120,13 +120,13 @@ def write_results_to_json(name, data, fit):
         results.update({'outputSignal': data['obs']})
     if 'true_order' in data:
         results.update({'trueOrder': np.array(data['true_order'])})
-    if 'guessedOrder' in data:
+    if 'order_guess' in data:
         results.update({'guessedOrder': np.array(data['order_guess'])})
-    if 'coefficientsA' in data:
+    if 'coefs_a' in data:
         results.update({'coefficientsA': data['coefs_a']})
-    if 'coefficientsB' in data:
+    if 'coefs_b' in data:
         results.update({'coefficientsB': data['coefs_b']})
-    if 'gridPoints' in data:
+    if 'grid_points' in data:
         results.update({'gridPoints': data['grid_points']})
 
     # Convert NumPy arrays to lists
