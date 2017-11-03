@@ -9,6 +9,11 @@ This will download the code and execute it on your computer. The progress will b
 ``` bash
 docker cp barx-sysid2018:/app/results/* <insert-directory-name>
 ```
-where you replace `<insert-directory-name>` with the search path to the directory where you want the results to be copied.
+where you replace `<insert-directory-name>` with the search path to the directory where you want the results to be copied. This action is carried out by the script `extract_results_from_docker_container.sh` which in Ubuntu can be run by executing
+``` bash
+chmod +x extract_results_from_docker_container.sh
+./extract_results_from_docker_container.sh barx-sysid2018
+```
+which will extract the results and put them into `results/`.
 
-The plots in the paper can then be replicated using the JSON files from the run of the Docker file. Please place these in the results folder from a cloned version of this repository and then run the code in **r/** to create the pdf files.
+The plots in the paper can then be replicated using the JSON files from the run of the Docker file. Please place these in the results folder from a cloned version of this repository and then run the code in `r/` to create the pdf files.
