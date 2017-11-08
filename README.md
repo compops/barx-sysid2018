@@ -3,16 +3,16 @@ All the results in this paper were generated using the code in a Docker containe
 
 First you need to download and installer Docker on your OS. Please see https://docs.docker.com/engine/installation/ for instructions on how to do this. Then you can run the Docker container by running the command
 ``` bash
-docker run --name barx-sysid2018 compops/barx-sysid2018:draft1
+docker run --name barx-sysid2018-run compops/barx-sysid2018:draft1
 ```
 This will download the code and execute it on your computer. The progress will be printed to the screen. Note that the runs will take a few hours to complete. The results can then be access by
 ``` bash
-docker cp barx-sysid2018:/app/results/* <insert-directory-name>
+docker cp barx-sysid2018-run:/app/results/<file-name> <insert-directory-name>
 ```
-where you replace `<insert-directory-name>` with the search path to the directory where you want the results to be copied. This action is carried out by the script `extract_results_from_docker_container.sh` which in Ubuntu can be run by executing
+where you replace `<file-name>` with the file to be copied and `<insert-directory-name>` with the search path to the directory where you want the results to be copied. This action is carried out by the script `extract_results_from_docker_container.sh` which in Ubuntu can be run by executing
 ``` bash
 chmod +x extract_results_from_docker_container.sh
-./extract_results_from_docker_container.sh barx-sysid2018
+./extract_results_from_docker_container.sh
 ```
 which will extract the results and put them into `results/`.
 

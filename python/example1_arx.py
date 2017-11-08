@@ -70,7 +70,7 @@ def run():
                         iter=data['no_iterations'],
                         chains=data['no_chains'],
                         init=init_random_data,
-                        seed=644461351)
+                        seed=10)
 
     # Save results to file
     file_name = "results/example1_arx.pickle"

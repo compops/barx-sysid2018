@@ -62,7 +62,7 @@ def run():
                         iter=data['no_iterations'],
                         chains=data['no_chains'],
                         init=init_eegdata,
-                        seed=644461351)
+                        seed=10)
 
     # Save results to file
     file_name = "results/example3_eegdata.pickle"
