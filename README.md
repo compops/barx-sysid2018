@@ -11,20 +11,15 @@ This code is used to set-up and run all the experiments in the paper. The code c
 ### Docker
 A simple method to reproduce the results is to make use of the Docker container build from the code in this repository when the paper was published. Docker enables you to recreate the computational environment used to create the results in the paper. Hence, it automatically downloads the correct version of Python and all dependencies.
 
-First, you need to download and installer Docker on your OS. Please see https://docs.docker.com/engine/installation/ for instructions on how to do this. Then you can run the Docker container by running the command
+First, you need to download and installer Docker on your OS. Please see https://docs.docker.com/engine/installation/ for instructions on how to do this. Secondly, you can run the Docker container by running the command
 ``` bash
 docker run --name barx-sysid2018-run compops/barx-sysid2018:draft1
 ```
-This will download the code and execute it on your computer. The progress will be printed to the screen. Note that the runs will take a few hours to complete. The results can then be access by
+This will download the code and execute it on your computer. The progress will be printed to the screen. Note that the runs will take a day or two to complete. Thirdly, The results can then be access by
 ``` bash
-docker cp barx-sysid2018-run:/app/results/<file-name> <insert-directory-name>
+docker cp barx-sysid2018-run:/app/barx-sysid2018-results.tgz .
 ```
-where you replace `<file-name>` with the file to be copied and `<insert-directory-name>` with the search path to the directory where you want the results to be copied. This action is carried out by the script `extract_results_from_docker_container.sh` which in Ubuntu can be run by executing
-``` bash
-chmod +x extract_results_from_docker_container.sh
-./extract_results_from_docker_container.sh
-```
-which will extract the results and put them into the current folder.
+which copies a tarball of the results into the current folder. To reproduce the plots from the paper, uncompress the tarball and move the contents of the results folder into a folder called results in a cloned version of the GitHub repository. Follow the instruction for the R code to create pdf versions of the plots.
 
 ## R code
 This code is used to generate diagnostic plot as well as plots and table for the paper. See the `README.md` file for more information.

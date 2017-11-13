@@ -1,23 +1,41 @@
-results/
-result/
+# Stan
 pystan
-.json
-.pickle
-*.json
+
+# Old results
+result/
+results/
+results-tests/
+results-report/
 *.pickle
-*workspace.mat
+*.json
+*.txt
+*.json.gz
+
+# LaTeX files
+*.aux
+*.bbl
+*.blg
+*.log
+*.synctex.gz
+
+# VS code
+.vscode/
+
+# R files
+.Rhistory
+.Rapp.history
+.RData
+.R~
+
+# MATLAB files
+.m~
 workspace.mat
 
-.vscode/
-*.R~
-*.m~
-*.pyc
-*.json
-.Rhistory
-results-report/
-.json
-*.pdf
-.pdf
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
