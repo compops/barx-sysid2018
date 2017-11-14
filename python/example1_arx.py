@@ -73,8 +73,8 @@ def run():
                         seed=10)
 
     # Save results to file
-    file_name = "results/example1_arx.pickle"
+    file_name = "results/example1/example1_arx.pickle"
     ensure_dir(file_name)
     with open(file_name, "wb") as f:
         pickle.dump({'model' : model, 'fit' : fit}, f, protocol=-1)
-    write_results_to_json('example1_arx', data, fit)
+    write_results_to_json('results/example1/example1_arx', data, fit)

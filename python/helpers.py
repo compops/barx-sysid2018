@@ -1,5 +1,6 @@
 """Helpers for BARX model."""
 import json
+import gzip
 import os
 import numpy as np
 
@@ -79,8 +80,8 @@ def write_results_to_json(name, data, fit):
     for plotting in e.g., R."""
     results = {}
     results.update({'name': name})
-    results.update({'no_iterations': data['no_iterations']})
-    results.update({'no_chains': data['no_chains']})
+    results.update({'noIterations': data['no_iterations']})
+    results.update({'noChains': data['no_chains']})
 
     if 'model_coefs' in fit.extract().keys():
         results.update({'modelCoefficients': fit.extract("model_coefs")['model_coefs']})
@@ -109,10 +110,10 @@ def write_results_to_json(name, data, fit):
         results.update({'yValidation': data['y_val']})
     if 'y_est' in data:
         results.update({'yEstimation': data['y_est']})
-    if 'data_matrix_est' in data:
-        results.update({'regressorMatrixEstimation': data['data_matrix_est']})
-    if 'data_matrix_val' in data:
-        results.update({'regressorMatrixValidation': data['data_matrix_val']})
+    if 'est_data_matrix' in data:
+        results.update({'regressorMatrixEstimation': data['est_data_matrix']})
+    if 'val_data_matrix' in data:
+        results.update({'regressorMatrixValidation': data['val_data_matrix']})
 
     if 'inputs' in data:
         results.update({'inputSignal': data['inputs']})
@@ -136,8 +137,10 @@ def write_results_to_json(name, data, fit):
 
     file_name = 'results/' + name + '.json'
     ensure_dir(file_name)
-    with open(file_name, 'w') as f:
-            json.dump(results, f, ensure_ascii=False)
+    with gzip.GzipFile(file_name + '.gz', 'w') as fout:
+        json_str = json.dumps(results)
+        json_bytes = json_str.encode('utf-8')
+        fout.write(json_bytes)
 
 def ensure_dir(file_name):
     """ Check if dirs for outputs exists, otherwise create them"""

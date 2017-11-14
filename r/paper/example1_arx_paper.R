@@ -9,7 +9,7 @@ plotColors = c(plotColors, plotColors)
 ################################################################################
 # Load data and set up the model
 ################################################################################
-name <- "example1_arx"
+name <- ""
 trueDensity <- function(x) {
   dnorm(x, 0, 0.5)
 }
@@ -17,8 +17,8 @@ trueDensity <- function(x) {
 gridLimits <- c(-6, 6)
 dataLimits <- c(-2, 2)
 savePlotsToFile <- TRUE
-result <- read_json(paste("../results", paste(name, ".json", sep = ""), sep=""), simplifyVector = TRUE)
-result_matlab <- readMat("../results/example1_arx.mat")
+result <- read_json("../results/example1/example1_arx.json.gz", simplifyVector = TRUE)
+result_matlab <- readMat("../matlab/example1_arx_workspace.mat")
 
 ################################################################################
 # Compute quantities requried for plotting
@@ -51,7 +51,7 @@ for (i in 1:dim(result$predictiveMean)[2]) {
 ##################################################################################################
 # Code for plotting
 
-if (savePlotsToFile) {cairo_pdf("example1_arx_paper.pdf", height = 8, width = 8)
+if (savePlotsToFile) {cairo_pdf("../results/example1_arx_paper.pdf", height = 8, width = 8)
 }
 layout(matrix(c(1, 1, 1, 2, 2, 2, 3, 4, 5), 3, 3, byrow = TRUE))
 par(mar = c(4, 5, 1, 1))

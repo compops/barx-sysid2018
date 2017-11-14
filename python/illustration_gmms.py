@@ -8,7 +8,7 @@ from python.helpers import write_results_to_json
 from python.helpers import ensure_dir
 from python.helpers import randn_skew_fast
 
-def run(no_obs=100):
+def run(no_obs=1000):
     """Executes the experiment."""
 
     for noise_dist in range(4):
@@ -38,11 +38,10 @@ def run(no_obs=100):
                 comp = int(np.random.choice(no_comps, 1, p=mix_probs))
                 obs[idx] = np.random.normal(loc=mix_means[comp],
                                             scale=mix_stdevs[comp])
-
             name = 'mixture'
 
         # Run Stan
-        grid_points = np.arange(-10, 10, 0.01)
+        grid_points = np.arange(-20, 20, 0.05)
         no_grid_points = len(grid_points)
         data = {'no_obs': no_obs,
                 'no_comp': 5,
@@ -61,8 +60,8 @@ def run(no_obs=100):
                             seed=10)
 
         # Save results to file
-        file_name = 'results/' + "illustration_gmm_" + name + ".pickle"
+        file_name = 'results/illustration/' + "illustration_gmm_" + name + ".pickle"
         ensure_dir(file_name)
         with open(file_name, "wb") as f:
             pickle.dump({'model': model, 'fit': fit}, f, protocol=-1)
-        write_results_to_json("illustration_gmm_" + name, data, fit)
+        write_results_to_json("results/illustration/illustration_gmm_" + name, data, fit)
