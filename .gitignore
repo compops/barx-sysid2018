@@ -22,13 +22,13 @@ results-report/
 .vscode/
 
 # R files
-.Rhistory
-.Rapp.history
+*.Rhistory
+*.Rapp.history
 .RData
-.R~
+*.R~
 
 # MATLAB files
-.m~
+*.m~
 workspace.mat
 
 # Byte-compiled / optimized / DLL files

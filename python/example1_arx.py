@@ -29,14 +29,14 @@ def run():
     val_inputs = inputs[no_est_data:]
 
     # Build regressor matrices
-    order_guess = (4, 5)
+    order_guess = (5, 5)
     est_data_matrix = build_phi_matrix(est_obs, order_guess, est_inputs)
     y_est = est_obs[int(np.max(order_guess)):]
     val_data_matrix = build_phi_matrix(val_obs, order_guess, val_inputs)
     y_val = val_obs[int(np.max(order_guess)):]
 
     # Run Stan
-    grid_points = np.arange(-6, 6, 0.05)
+    grid_points = np.arange(-10, 10, 0.05)
     no_grid_points = len(grid_points)
 
     data = {'no_est_data': len(y_est),
@@ -61,7 +61,7 @@ def run():
             'obs': obs,
             'inputs': inputs,
 
-            'no_iterations': 10000,
+            'no_iterations': 30000,
             'no_chains': 1
     }
 
@@ -77,4 +77,4 @@ def run():
     ensure_dir(file_name)
     with open(file_name, "wb") as f:
         pickle.dump({'model' : model, 'fit' : fit}, f, protocol=-1)
-    write_results_to_json('results/example1/example1_arx', data, fit)
+    write_results_to_json('example1_arx', data, fit, 'results/example1/example1_arx.json.gz')

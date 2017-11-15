@@ -1,52 +1,80 @@
 clear all
+close all 
 
 %% Generate data
 rng(54531445)
-
 noObservations = 1000;
-noEstimationData = floor(0.67 * noObservations);
-noValidationData = noObservations - noEstimationData;
-systemOrder = 2;
 
-[b, a] = cheby1(systemOrder, 5, [0.2 0.6], 'stop');
-dataIn = randn(noObservations, 1);
-dataOut = filter(b, a, dataIn);
-
-indicator = randsample(2, noObservations, true, [0.2 0.8]);
-noise1 = 4 + 0.50 * randn(noObservations, 1);
-noise2 = 0  + 0.50 * randn(noObservations, 1);
+% Generate noise from Gaussian mixture model with two components
+indicator = randsample(2, noObservations, true, [0.1 0.9]);
+noise1 = 5  + 0.2 * randn(noObservations, 1);
+noise2 = 0  + 0.2 * randn(noObservations, 1);
 noise = noise2;
 noise(indicator == 1) = noise1(indicator == 1);
-dataOutNoisy = dataOut + noise;
 
+% From the documentation of the ARX command
+A = [1  -0.25  0.2];
+B = [0 1 0.5];
+m0 = idpoly(A, B);
+u = iddata([], randn(noObservations, 1));
+e = iddata([], noise);
+y = sim(m0,[u e]);
+z = [y, u];
+
+dataIn = u.InputData;
+dataOutNoisy = y.OutputData;
+
+% Save to file
+a = A;
+b = B;
 save('../data/example2_arxgmm.mat', 'dataIn', 'dataOutNoisy', 'a', 'b', '-v4')
 
-% Estimate the one-step ahead predictor on validation data using an 
-% oracle that knows the offset
-noise3 = noise;
-noise3(indicator == 1) = noise3(indicator == 1) - 3;
-oracleOutput = dataOut + noise3;
+%% Estimate the model when the model order is unknown
 
-oracleEstimationData = iddata(oracleOutput(1:noEstimationData), dataIn(1:noEstimationData));
-oracleValidationData = iddata(oracleOutput(noEstimationData:end), dataIn(noEstimationData:end));
-res1 = arx(oracleEstimationData,[4 5 0]);
-pre1 = predict(res1, oracleValidationData);
-pre1 = pre1.OutputData;
-pre1(indicator(noEstimationData:end) == 1) = pre1(indicator(noEstimationData:end) == 1) + 3;
-mf1 = 100 * (1 - sum((pre1 - dataOutNoisy(noEstimationData:end)).^2) / sum((dataOutNoisy(noEstimationData:end) - mean(dataOutNoisy(noEstimationData:end))).^2));
+% Select model order by exhaustive search using half of the estimation set
+% for estimating model and the remaining for computing the prediction error
+noDataPoints = floor(0.33 * noObservations);
+estimationData1 = iddata(dataOutNoisy(1:noDataPoints), dataIn(1:noDataPoints));
+estimationData2 = iddata(dataOutNoisy(noDataPoints:(2*noDataPoints)), dataIn(noDataPoints:(2*noDataPoints)));
 
-%% Estimate the one-step ahead predictor on validation data
+predictionError = zeros([5 5]);
+for na=1:5
+    for nb=1:5
+        modelEstimate = arx(estimationData1, [na nb 0]);
+        predictionErrObject = pe(modelEstimate, estimationData2);
+        predictionError(na, nb) = sum((predictionErrObject.OutputData).^2);
+        disp([na nb]);
+    end
+end
+
+% Find the model order that minimises the squared prediction error
+idx = find(min(min(predictionError)) == predictionError);
+[na, nb] = ind2sub([5 5], idx);
+
+% Estimate the model using all the estimation data
+noEstimationData = floor(0.67 * noObservations);
+noValidationData = noObservations - noEstimationData;
 estimationData = iddata(dataOutNoisy(1:noEstimationData), dataIn(1:noEstimationData));
 validationData = iddata(dataOutNoisy(noEstimationData:end), dataIn(noEstimationData:end));
-noValidationData = length(validationData.OutputData);
 
-res2 = arx(estimationData, [4 5 0]);
-pre2 = predict(res2, validationData);
-pre2 = pre2.OutputData;
+modelEstimate = arx(estimationData1, [na nb 0]);
+yhat = predict(modelEstimate, validationData);
+yhat = yhat.OutputData;
 
-plot(1:noValidationData, dataOutNoisy(noEstimationData:end), 1:noValidationData, pre2, 'r')
-mf2 = 100 * (1 - sum((pre2 - dataOutNoisy(noEstimationData:end)).^2) / sum((dataOutNoisy(noEstimationData:end) - mean(dataOutNoisy(noEstimationData:end))).^2));
+aHat = modelEstimate.a;
+bHat = modelEstimate.b;
+modelFit = 100 * (1 - sum((yhat - dataOutNoisy(noEstimationData:end)).^2) / sum((dataOutNoisy(noEstimationData:end) - mean(dataOutNoisy(noEstimationData:end))).^2));
 
-%%
-save('../results/example2_arxgmm_prediction.mat', 'pre2')
+%% Estimate the model when the model order is known
+
+modelEstimate = arx(estimationData1, [2 3 0]);
+yhatOracle = predict(modelEstimate, validationData);
+yhatOracle = yhatOracle.OutputData;
+
+aHatOracle = modelEstimate.a;
+bHatOracle = modelEstimate.b;
+modelFitOracle = 100 * (1 - sum((yhatOracle - dataOutNoisy(noEstimationData:end)).^2) / sum((dataOutNoisy(noEstimationData:end) - mean(dataOutNoisy(noEstimationData:end))).^2));
+
+%% Save everything to file
+
 save('example2_arxgmm_workspace.mat')

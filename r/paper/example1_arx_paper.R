@@ -1,30 +1,26 @@
-setwd("~/src/barx-sysid2018/r")
+setwd("~/src/barx-sysid2018")
 library("jsonlite")
 library("RColorBrewer")
 library("HDInterval")
 library("R.matlab")
+
+#############################################################################
+#############################################################################
+# Load data and set up the model
 plotColors = brewer.pal(8, "Dark2")
 plotColors = c(plotColors, plotColors)
 
-################################################################################
-# Load data and set up the model
-################################################################################
-name <- ""
-trueDensity <- function(x) {
-  dnorm(x, 0, 0.5)
-}
-
 gridLimits <- c(-6, 6)
-dataLimits <- c(-2, 2)
+dataLimits <- c(-20, 20)
 savePlotsToFile <- TRUE
-result <- read_json("../results/example1/example1_arx.json.gz", simplifyVector = TRUE)
-result_matlab <- readMat("../matlab/example1_arx_workspace.mat")
+result <- read_json("results/example1/example1_arx.json.gz", simplifyVector = TRUE)
+result_matlab <- readMat("matlab/example1_arx_workspace.mat")
 
-################################################################################
+#############################################################################
+#############################################################################
 # Compute quantities requried for plotting
 # Posterior mean estimate of mixture components and the high posterior
 # density intervals for the one-step ahead predictor
-################################################################################
 noBins <- floor(sqrt(result$noIterations))
 noTrainData <- dim(result$regressorMatrixEstimation)[1]
 noEvalData <- dim(result$regressorMatrixValidation)[1]
@@ -48,46 +44,47 @@ for (i in 1:dim(result$predictiveMean)[2]) {
   oneStepPredHPD[i, ] <- c(res[1], res[2])
 }
 
-##################################################################################################
+#############################################################################
+#############################################################################
 # Code for plotting
-
-if (savePlotsToFile) {cairo_pdf("../results/example1_arx_paper.pdf", height = 8, width = 8)
-}
+if (savePlotsToFile) {cairo_pdf("results/example1_arx_paper.pdf", height = 8, width = 8)}
 layout(matrix(c(1, 1, 1, 2, 2, 2, 3, 4, 5), 3, 3, byrow = TRUE))
 par(mar = c(4, 5, 1, 1))
 
+#############################################################################
 ## Plot of validation data together with one-step ahead predictor
-grid <- seq(1, length(result$yValidation))
+grid <- seq(1, 300)
 
 plot(grid,
-  result$yValidation,
+  result$yValidation[1:300],
   col = plotColors[8],
   type = "p",
   pch = 19,
-  cex = 0.5,
+  cex = 1,
   bty = "n",
   xlab = "time",
   ylab = "observation",
-  xlim = c(0, 350),
+  xlim = c(0, 300),
   ylim = dataLimits
 )
 
 polygon(
   c(grid, rev(grid)),
-  c(oneStepPredHPD[, 1], rev(oneStepPredHPD[, 2])),
+  c(oneStepPredHPD[1:300, 1], rev(oneStepPredHPD[1:300, 2])),
   border = NA,
   col = rgb(t(col2rgb(plotColors[2])) / 256, alpha = 0.5)
 )
 
-lines(grid, oneStepPredHPD[, 1], col=plotColors[2])
-lines(grid, oneStepPredHPD[, 2], col=plotColors[2])
+lines(grid, oneStepPredHPD[1:300, 1], col = plotColors[2], lwd = 0.5)
+lines(grid, oneStepPredHPD[1:300, 2], col = plotColors[2], lwd = 0.5)
 
 lines(grid,
-      result_matlab$pre[-c(1:6)],
+      result_matlab$yhat[-c(1:6)][1:300],
       col = plotColors[3],
       lwd = 1
 )
 
+#############################################################################
 # Plot of the the posterior estimate of the filter/model coefficients
 hist(
   result$modelCoefficients[, 1],
@@ -96,9 +93,9 @@ hist(
   freq = F,
   col = rgb(t(col2rgb(plotColors[3])) / 256, alpha = 0.25),
   border = NA,
-  xlab = expression(g),
+  xlab = "filter coefficients",
   ylab = "posterior probability",
-  xlim = c(-0.6, 0.6),
+  xlim = c(-2, 1.5),
   ylim = c(0, 20)
 )
 
@@ -115,13 +112,20 @@ for (i in 2:systemOrder) {
     border = NA,
     add = TRUE
   )
-
-  lines(density(result$modelCoefficients[, i],
-                kernel = "e"),
-        lwd = 2,
-        col = plotColors[2 + i])
+  lines(density(result$modelCoefficients[, i], kernel = "e"),
+          lwd = 2,
+          col = plotColors[2 + i])
 }
 
+for (i in 2:length(result_matlab$a)){
+  abline(v = result_matlab$a[i], lty = "dotted")
+}
+
+for (i in 1:length(result_matlab$b)){
+  abline(v = result_matlab$b[i], lty = "dotted")
+}
+
+#############################################################################
 # Plot of the posterior estimate of priors
 hist(
   result$modelCoefficientsPrior,
@@ -132,20 +136,22 @@ hist(
   border = NA,
   xlab = "modelCoefficientsPrior",
   ylab = "posterior estimate",
-  xlim = c(0.2, 1)
+  xlim = c(0.4, 1.4),
+  ylim = c(0, 5)
 )
 
 lines(
   density(
     result$modelCoefficientsPrior,
     kernel = "e",
-    from = 0.2,
-    to = 1
+    from = 0.4,
+    to = 1.4
   ),
   lwd = 2,
   col = plotColors[8]
 )
 
+#############################################################################
 # Plot of the posterior estimate of priors
 hist(
   result$mixtureMeansPrior,
@@ -156,20 +162,21 @@ hist(
   border = NA,
   xlab = "mixtureMeansPrior",
   ylab = "posterior estimate",
-  xlim = c(-1, 2)
+  xlim = c(-0.5, 1.5)
 )
 
 lines(
   density(
     result$mixtureMeansPrior,
     kernel = "e",
-    from = -1,
-    to = 2
+    from = -0.5,
+    to = 1.5
   ),
   lwd = 2,
   col = plotColors[8]
 )
 
+#############################################################################
 # Plot of the posterior estimate of priors
 hist(
   result$mixtureWeightsPrior,
@@ -180,7 +187,8 @@ hist(
   border = NA,
   xlab = "mixtureWeightsPrior",
   ylab = "posterior estimate",
-  xlim = c(0, 0.4)
+  xlim = c(0, 0.6),
+  ylim = c(0, 10)
 )
 
 lines(
@@ -188,7 +196,7 @@ lines(
     result$mixtureWeightsPrior,
     kernel = "e",
     from = 0,
-    to = 0.4
+    to = 0.6
   ),
   lwd = 2,
   col = plotColors[8]
@@ -198,10 +206,14 @@ if (savePlotsToFile) {
   dev.off()
 }
 
+#############################################################################
+#############################################################################
+# Compute model fits
+
 predError <- sum((rowMeans(oneStepPredHPD) - result$yValidation) ^ 2)
 evalObsVar <- sum((result$yValidation - mean(result$yValidation)) ^ 2)
 (modelFitBARX <- 100 * (1 - predError / evalObsVar))
 
-predError <- sum((result_matlab$pre[-c(1:6)]- result$yValidation) ^ 2)
+predError <- sum((result_matlab$yhat[-c(1:6)] - result$yValidation) ^ 2)
 evalObsVar <- sum((result$yValidation - mean(result$yValidation)) ^ 2)
 (modelFitARX <- 100 * (1 - predError / evalObsVar))

@@ -34,12 +34,10 @@ def randn_skew_fast(N, alpha=0.0, loc=0.0, scale=1.0):
 def init_random_data():
     """Initial the Stan algorithm for random data set used in examples 1 and 2.
     The only difference is the data range and model orders."""
-    order = 9
+    order = 10
     no_comp = 5
-    data_range = (-2.6, 12.2)
-    mixture_means = np.sort(np.random.uniform(low=data_range[0],
-                                              high=data_range[1],
-                                              size=no_comp))
+    data_range = (-16.0, 19.0)
+    mixture_means = np.linspace(data_range[0], data_range[1], no_comp)
     mixture_variances = np.ones(no_comp)
     model_coef = np.random.uniform(low=-1.0, high=1.0, size=order)
 
@@ -59,9 +57,7 @@ def init_eegdata():
     order = 10
     no_comp = 5
     data_range = (-5.0, 2.0)
-    mixture_means = np.sort(np.random.uniform(low=data_range[0],
-                                              high=data_range[1],
-                                              size=no_comp))
+    mixture_means = np.linspace(data_range[0], data_range[1], no_comp)
     mixture_variances = np.ones(no_comp)
     model_coef = np.random.uniform(low=-1.0, high=1.0, size=order)
 
@@ -75,7 +71,7 @@ def init_eegdata():
                 )
     return output
 
-def write_results_to_json(name, data, fit):
+def write_results_to_json(name, data, fit, file_name):
     """Compiles the results from a Stan run and writes it to a JSON file
     for plotting in e.g., R."""
     results = {}
@@ -135,9 +131,8 @@ def write_results_to_json(name, data, fit):
         if isinstance(results[key], np.ndarray):
             results[key] = results[key].tolist()
 
-    file_name = 'results/' + name + '.json'
     ensure_dir(file_name)
-    with gzip.GzipFile(file_name + '.gz', 'w') as fout:
+    with gzip.GzipFile(file_name, 'w') as fout:
         json_str = json.dumps(results)
         json_bytes = json_str.encode('utf-8')
         fout.write(json_bytes)

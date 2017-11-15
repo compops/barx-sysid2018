@@ -64,4 +64,4 @@ def run(no_obs=1000):
         ensure_dir(file_name)
         with open(file_name, "wb") as f:
             pickle.dump({'model': model, 'fit': fit}, f, protocol=-1)
-        write_results_to_json("results/illustration/illustration_gmm_" + name, data, fit)
+        write_results_to_json("illustration_gmm_" + name, data, fit, 'results/illustration/illustration_gmm_' + name + '.json.gz')
