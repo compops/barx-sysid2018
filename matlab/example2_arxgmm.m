@@ -1,3 +1,4 @@
+
 clear all
 close all 
 
@@ -6,9 +7,9 @@ rng(54531445)
 noObservations = 1000;
 
 % Generate noise from Gaussian mixture model with two components
-indicator = randsample(2, noObservations, true, [0.1 0.9]);
-noise1 = 5  + 0.2 * randn(noObservations, 1);
-noise2 = 0  + 0.2 * randn(noObservations, 1);
+indicator = randsample(2, noObservations, true, [0.4 0.6]);
+noise1 = 7 + randn(noObservations, 1);
+noise2 = 0 + randn(noObservations, 1);
 noise = noise2;
 noise(indicator == 1) = noise1(indicator == 1);
 
@@ -77,4 +78,4 @@ modelFitOracle = 100 * (1 - sum((yhatOracle - dataOutNoisy(noEstimationData:end)
 
 %% Save everything to file
 
-save('example2_arxgmm_workspace.mat')
+save('../results/example2/example2_arxgmm_workspace.mat')

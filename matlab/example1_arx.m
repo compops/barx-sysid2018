@@ -69,4 +69,4 @@ modelFitOracle = 100 * (1 - sum((yhatOracle - dataOutNoisy(noEstimationData:end)
 
 %% Save everything to file
 
-save('example1_arx_workspace.mat')
+save('../results/example1/example1_arx_workspace.mat')

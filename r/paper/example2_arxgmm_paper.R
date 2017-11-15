@@ -11,14 +11,14 @@ plotColors = brewer.pal(8, "Dark2")
 plotColors = c(plotColors, plotColors)
 
 trueDensity <- function(x) {
-  0.8 * dnorm(x, 0, 0.5) + 0.2 * dnorm(x, 5, 0.5)
+  0.6 * dnorm(x, 0, 1) + 0.4 * dnorm(x, 7, 1)
 }
 
-gridLimits <- c(-4, 8)
-dataLimits <- c(-4, 10)
+gridLimits <- c(-4, 10)
+dataLimits <- c(-6, 12)
 savePlotsToFile <- TRUE
 result <- read_json("results/example2/example2_arx_gmm.json.gz", simplifyVector = TRUE)
-result_matlab <- readMat("matlab/example2_arxgmm_workspace.mat")
+result_matlab <- readMat("results/example2/example2_arxgmm_workspace.mat")
 
 
 #############################################################################
@@ -98,27 +98,31 @@ lines(grid,
       lwd = 1.5
 )
 
-abline(v = 244, lty = "dotted")
-abline(v = 241, lty = "dotted")
+abline(v = 80, lty = "dotted")
+abline(v = 262, lty = "dotted")
 
 #############################################################################
 ## Plot the density of the one-step-ahead predictor at two time steps
-t <- 244
-noBins <- floor(sqrt(dim(result$predictiveMean)[1]))
-
-hist(result$predictiveMean[, t], 
-     noBins,
-     main = "",
-     freq = F,
-     col = rgb(t(col2rgb(plotColors[2])) / 256, alpha = 0.25),
-     border = NA,
+t <- 80
+den <- density(result$predictiveMean[, t], from = -5, to = 10)
+plot(den$x, 
+     den$y,
+     col = plotColors[2],
+     type = "l",
+     bty = "n",     
      xlab = expression(hat(y)),
      ylab = "posterior probability",
-     ylim = c(0, 2),
-     xlim = c(-4, 8)
+     ylim = c(0, 0.5),
+     xlim = dataLimits,
+     lwd = 2,
+     main = ""
 )
-
-lines(density(result$predictiveMean[, t], from = -4, to = 8), col = plotColors[2], lwd = 2)
+polygon(
+  c(den$x, rev(den$x)),
+  c(rep(0, length(den$y)), rev(den$y)),
+  border = NA,
+  col = rgb(t(col2rgb(plotColors[2])) / 256, alpha = 0.25)
+)
 
 points(result_matlab$yhat[-c(1:6)][t], 0.0, pch = 19, col = plotColors[3])
 abline(v = result_matlab$yhat[-c(1:6)][t], col = plotColors[3], lwd = 2)
@@ -126,22 +130,26 @@ abline(v = result_matlab$yhat[-c(1:6)][t], col = plotColors[3], lwd = 2)
 points(result$yValidation[t], 0.0, pch = 19, col = plotColors[1])
 abline(v = result$yValidation[t], col = plotColors[1], lwd = 2)
 
-t <- 241
-noBins <- floor(sqrt(dim(result$predictiveMean)[1]))
-
-hist(result$predictiveMean[, t], 
-     noBins,
-     main = "",
-     freq = F,
-     col = rgb(t(col2rgb(plotColors[2])) / 256, alpha = 0.25),
-     border = NA,
+t <- 262
+den <- density(result$predictiveMean[, t], from = -5, to = 10)
+plot(den$x, 
+     den$y,
+     col = plotColors[2],
+     type = "l",
+     bty = "n",     
      xlab = expression(hat(y)),
      ylab = "posterior probability",
-     ylim = c(0, 4),
-     xlim = c(-4, 8)
+     ylim = c(0, 0.5),
+     xlim = dataLimits,
+     lwd = 2,
+     main = ""
 )
-
-lines(density(result$predictiveMean[, t], from = -4, to = 8), col = plotColors[2], lwd = 2)
+polygon(
+  c(den$x, rev(den$x)),
+  c(rep(0, length(den$y)), rev(den$y)),
+  border = NA,
+  col = rgb(t(col2rgb(plotColors[2])) / 256, alpha = 0.25)
+)
 
 points(result_matlab$yhat[-c(1:6)][t], 0.0, pch = 19, col = plotColors[3])
 abline(v = result_matlab$yhat[-c(1:6)][t], col = plotColors[3], lwd = 2)
@@ -162,7 +170,7 @@ plot(
   xlab = "x",
   ylab = "mixture density",
   xlim = gridLimits,
-  ylim = c(0, 0.8)
+  ylim = c(0, 0.25)
 )
 
 lines(result$gridPoints,

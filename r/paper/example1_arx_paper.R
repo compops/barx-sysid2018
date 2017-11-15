@@ -14,7 +14,7 @@ gridLimits <- c(-6, 6)
 dataLimits <- c(-20, 20)
 savePlotsToFile <- TRUE
 result <- read_json("results/example1/example1_arx.json.gz", simplifyVector = TRUE)
-result_matlab <- readMat("matlab/example1_arx_workspace.mat")
+result_matlab <- readMat("results/example1/example1_arx_workspace.mat")
 
 #############################################################################
 #############################################################################
