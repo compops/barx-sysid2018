@@ -70,7 +70,9 @@ plot(grid,
   xlab = "time",
   ylab = "observation",
   xlim = c(0, 300),
-  ylim = dataLimits
+  ylim = dataLimits,
+  cex.lab = 1.5,
+  cex.axis = 1.5
 )
 
 polygon(
@@ -115,7 +117,9 @@ plot(den$x,
      ylim = c(0, 0.5),
      xlim = dataLimits,
      lwd = 2,
-     main = ""
+     main = "",
+     cex.lab = 1.5,
+     cex.axis = 1.5
 )
 polygon(
   c(den$x, rev(den$x)),
@@ -127,8 +131,8 @@ polygon(
 points(result_matlab$yhat[-c(1:6)][t], 0.0, pch = 19, col = plotColors[3])
 abline(v = result_matlab$yhat[-c(1:6)][t], col = plotColors[3], lwd = 2)
 
-points(result$yValidation[t], 0.0, pch = 19, col = plotColors[1])
-abline(v = result$yValidation[t], col = plotColors[1], lwd = 2)
+points(result$yValidation[t], 0.0, pch = 19, col = plotColors[8])
+abline(v = result$yValidation[t], col = plotColors[8], lwd = 2)
 
 t <- 262
 den <- density(result$predictiveMean[, t], from = -5, to = 10)
@@ -142,7 +146,9 @@ plot(den$x,
      ylim = c(0, 0.5),
      xlim = dataLimits,
      lwd = 2,
-     main = ""
+     main = "",
+     cex.lab = 1.5,
+     cex.axis = 1.5
 )
 polygon(
   c(den$x, rev(den$x)),
@@ -154,8 +160,8 @@ polygon(
 points(result_matlab$yhat[-c(1:6)][t], 0.0, pch = 19, col = plotColors[3])
 abline(v = result_matlab$yhat[-c(1:6)][t], col = plotColors[3], lwd = 2)
 
-points(result$yValidation[t], 0.0, pch = 19, col = plotColors[1])
-abline(v = result$yValidation[t], col = plotColors[1], lwd = 2)
+points(result$yValidation[t], 0.0, pch = 19, col = plotColors[8])
+abline(v = result$yValidation[t], col = plotColors[8], lwd = 2)
 
 #############################################################################
 ## Plot of the estimate of the noise distribution
@@ -170,7 +176,9 @@ plot(
   xlab = "x",
   ylab = "mixture density",
   xlim = gridLimits,
-  ylim = c(0, 0.25)
+  ylim = c(0, 0.25),
+  cex.lab = 1.5,
+  cex.axis = 1.5
 )
 
 lines(result$gridPoints,

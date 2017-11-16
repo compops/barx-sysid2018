@@ -65,7 +65,9 @@ plot(grid,
   xlab = "time",
   ylab = "observation",
   xlim = c(0, 300),
-  ylim = dataLimits
+  ylim = dataLimits,
+  cex.lab = 1.5,
+  cex.axis = 1.5
 )
 
 polygon(
@@ -96,7 +98,9 @@ hist(
   xlab = "filter coefficients",
   ylab = "posterior probability",
   xlim = c(-2, 1.5),
-  ylim = c(0, 20)
+  ylim = c(0, 20),
+  cex.lab = 1.5,
+  cex.axis = 1.5
 )
 
 lines(density(result$modelCoefficients[, 1], kernel = "e"),
@@ -134,10 +138,12 @@ hist(
   freq = F,
   col = rgb(t(col2rgb(plotColors[8])) / 256, alpha = 0.25),
   border = NA,
-  xlab = "modelCoefficientsPrior",
+  xlab = expression(sigma[f]),
   ylab = "posterior estimate",
   xlim = c(0.4, 1.4),
-  ylim = c(0, 5)
+  ylim = c(0, 5),
+  cex.lab = 1.5,
+  cex.axis = 1.5
 )
 
 lines(
@@ -160,9 +166,11 @@ hist(
   freq = F,
   col = rgb(t(col2rgb(plotColors[8])) / 256, alpha = 0.25),
   border = NA,
-  xlab = "mixtureMeansPrior",
+  xlab = expression(sigma[mu]),
   ylab = "posterior estimate",
-  xlim = c(-0.5, 1.5)
+  xlim = c(-0.5, 1.5),
+  cex.lab = 1.5,
+  cex.axis = 1.5
 )
 
 lines(
@@ -185,10 +193,12 @@ hist(
   freq = F,
   col = rgb(t(col2rgb(plotColors[8])) / 256, alpha = 0.25),
   border = NA,
-  xlab = "mixtureWeightsPrior",
+  xlab = expression(e[0]),
   ylab = "posterior estimate",
   xlim = c(0, 0.6),
-  ylim = c(0, 10)
+  ylim = c(0, 10),
+  cex.lab = 1.5,
+  cex.axis = 1.5
 )
 
 lines(
