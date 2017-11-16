@@ -12,7 +12,7 @@ plotColors = c(plotColors, plotColors)
 
 gridLimits <- c(-4, 4)
 dataLimits <- c(-5, 5)
-savePlotsToFile <- FALSE
+savePlotsToFile <- TRUE
 result <- read_json("results/example3/example3_eegdata.json.gz", simplifyVector = TRUE)
 
 #############################################################################
