@@ -31,5 +31,5 @@ This code is used to generate random filters together with data from tem and to 
 The data generated from each run of the proposed method takes up a lot of space. Therefore the generated data cannot be easily distributed via GitHub. Please contact the authors if you would like to receive a copy of the out from the simulations. Otherwise, you should be able to reproduce all runs yourself within a few hours by running the Docker container.
 
 ## License
-This source code is distributed under the MIT license. See the file `LICENSE` for more information.
+This source code is distributed under the GPLv3 license with (c) Johan Dahlin 2017 and comes with ABSOLUTELY NO WARRANTY. See the file `LICENSE` for more information.
 

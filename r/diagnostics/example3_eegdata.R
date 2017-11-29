@@ -1,4 +1,4 @@
-setwd("~/src/barx-sysid2018/r")
+setwd("~/src/barx-sysid2018")
 library("jsonlite")
 library("RColorBrewer")
 library("HDInterval")
@@ -17,7 +17,7 @@ trueDensity <- function(x) {
 gridLimits <- c(-2, 2)
 dataLimits <- c(-4, 2)
 savePlotsToFile <- FALSE
-result <- read_json(paste("../results", paste(name, ".json", sep = ""), sep=""), simplifyVector = TRUE)
+result <- read_json("results/example3/example3_eegdata.json.gz", simplifyVector = TRUE)
 
 ################################################################################
 # Compute quantities requried for plotting
@@ -289,3 +289,7 @@ lines(
 if (savePlotsToFile) {
   dev.off()
 }
+
+
+matrix(c(apply(result$modelCoefficients, 2, mean) + 1.96* apply(result$modelCoefficients, 2, sd),
+  apply(result$modelCoefficients, 2, mean) + 1.96* apply(result$modelCoefficients, 2, sd)), nrow=2, ncol=10)
