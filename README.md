@@ -31,5 +31,23 @@ This code is used to generate random filters together with data from tem and to 
 The data generated from each run of the proposed method takes up a lot of space. Therefore the generated data cannot be easily distributed via GitHub. Please contact the authors if you would like to receive a copy of the out from the simulations. Otherwise, you should be able to reproduce all runs yourself within a few hours by running the Docker container.
 
 ## License
-This source code is distributed under the GPLv3 license with (c) Johan Dahlin 2017 and comes with ABSOLUTELY NO WARRANTY. See the file `LICENSE` for more information.
-
+See the file `LICENSE` for more information.
+``` python
+###############################################################################
+#    Sparse Bayesian ARX models with flexible noise distributions
+#    Copyright (C) 2018  Johan Dahlin < uni (at) johandahlin [dot] com >
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+###############################################################################
+```
