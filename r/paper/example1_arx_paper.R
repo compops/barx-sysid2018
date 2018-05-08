@@ -95,7 +95,7 @@ hist(
   freq = F,
   col = rgb(t(col2rgb(plotColors[3])) / 256, alpha = 0.25),
   border = NA,
-  xlab = "filter coefficients",
+  xlab = "system coefficients",
   ylab = "posterior probability",
   xlim = c(-2, 1.5),
   ylim = c(0, 20),
