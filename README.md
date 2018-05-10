@@ -13,7 +13,7 @@ A simple method to reproduce the results is to make use of the Docker container 
 
 First, you need to download and installer Docker on your OS. Please see https://docs.docker.com/engine/installation/ for instructions on how to do this. Secondly, you can run the Docker container by running the command
 ``` bash
-docker run --name barx-sysid2018-run compops/barx-sysid2018:final
+docker run --name barx-sysid2018-run compops/barx-sysid2018:latest
 ```
 This will download the code and execute it on your computer. The progress will be printed to the screen. Note that the runs will take a day or two to complete. Thirdly, The results can then be access by
 ``` bash
