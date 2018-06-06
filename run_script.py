@@ -18,4 +18,4 @@ if len(sys.argv) > 1:
     else:
         raise NameError("Unknown example to run...")
 else:
-    raise NameError("Need to supply an argument to function call (0, 1, 2, 3) correponding to the numerical illustration to run.")
+    raise NameError("Need to supply an argument to function call (0, 1, 2, 3) corresponding to the numerical illustration to run.")
