@@ -13,13 +13,11 @@ A simple method to reproduce the results is to make use of the Docker container 
 
 First, you need to download and installer Docker on your OS. Please see https://docs.docker.com/engine/installation/ for instructions on how to do this. Secondly, you can run the Docker container by running the command
 ``` bash
-docker run --name barx-sysid2018-run compops/barx-sysid2018:latest
+docker run -v <<LOCALPATH>>:/app/results -e EXPERIMENT='<<EXPERIMENT_NUMBER>>' --name barx-sysid2018-run compops/barx-sysid2018:final
 ```
-This will download the code and execute it on your computer. The progress will be printed to the screen. Note that the runs will take a day or two to complete. Thirdly, The results can then be access by
-``` bash
-docker cp barx-sysid2018-run:/app/barx-sysid2018-results.tgz .
-```
-which copies a tarball of the results into the current folder. To reproduce the plots from the paper, uncompress the tarball and move the contents of the results folder into a folder called results in a cloned version of the GitHub repository. Follow the instruction for the R code to create pdf versions of the plots.
+where `<<LOCALPATH>>` is replaced with a local path to where the results are to be stored, e.g., `/home/username/tmp` on a Linux computer. `<<EXPERIMENT_NUMBER>>` is replaced with either 1, 2 or 3 corresponding to the three experiments in the paper.
+
+To reproduce the plots from the paper, move the contents of the results folder in `<<LOCALPATH>>` into a folder called results in a cloned version of the GitHub repository. Follow the instruction for the R code to create pdf versions of the plots.
 
 ## R code (r/)
 This code is used to generate diagnostic plot as well as plots and table for the paper. See the `README.md` file for more information.
