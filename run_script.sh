@@ -10,3 +10,6 @@ wait
 
 python run_script.py 3
 wait
+
+# Compress the results into one file
+tar -zcvf /app/barx-sysid2018-results.tgz /app/results/*
