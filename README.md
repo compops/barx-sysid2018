@@ -15,7 +15,7 @@ First, you need to download and installer Docker on your OS. Please see https://
 ``` bash
 docker run -v <<LOCALPATH>>:/app/results -e EXPERIMENT='<<EXPERIMENT_NUMBER>>' --name barx-sysid2018-run compops/barx-sysid2018:final
 ```
-where `<<LOCALPATH>>` is replaced with a local path to where the results are to be stored, e.g., `/home/username/tmp` on a Linux computer. `<<EXPERIMENT_NUMBER>>` is replaced with either 1, 2 or 3 corresponding to the three experiments in the paper.
+where `<<LOCALPATH>>` is replaced with a local path to where the results are to be stored, e.g., `/home/username/tmp` on a Linux computer. `<<EXPERIMENT_NUMBER>>` is replaced with either 0, 1, 2 or 3 corresponding to the illustration on GMMs (Figure 1) and the three experiments in the paper.
 
 To reproduce the plots from the paper, move the contents of the results folder in `<<LOCALPATH>>` into a folder called results in a cloned version of the GitHub repository. Follow the instruction for the R code to create pdf versions of the plots.
 
