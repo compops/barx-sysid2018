@@ -18,7 +18,7 @@ RUN pip install -r /app/python/requirements.txt
 CMD bash ./run_script.sh
 
 # Compress the results into one file
-#CMD tar -zcvf /app/barx-sysid2018-results.tgz /app/results
+CMD tar -zcvf /app/barx-sysid2018-results.tgz /app/results
 
 # Build
 # docker build -t barx-sysid2018 .
