@@ -21,5 +21,6 @@ CMD bash ./run_script.sh
 # docker build -t barx-sysid2018 .
 # docker images
 # docker tag <<TAG>> compops/barx-sysid2018:final
+# docker tag <<TAG>> compops/barx-sysid2018:latest
 # docker login --username=yourhubusername --email=youremail@provider.com
 # docker push compops/barx-sysid2018
