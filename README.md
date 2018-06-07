@@ -9,6 +9,8 @@ The paper is available as a preprint from https://arxiv.org/abs/1801.01242.
 This code is used to set-up and run all the experiments in the paper. The code can possibly also be modified for other models. See the `README.md` file for more information.
 
 ### Docker
+*Note that running STAN in a Docker container is for some reason very slow. This is a known problem, see e.g., https://github.com/jscamac/mwe_stan_docker. Please consider running the Python code locally without using Docker by cloning this repo instead.*
+
 A simple method to reproduce the results is to make use of the Docker container build from the code in this repository when the paper was published. Docker enables you to recreate the computational environment used to create the results in the paper. Hence, it automatically downloads the correct version of Python and all dependencies.
 
 First, you need to download and installer Docker on your OS. Please see https://docs.docker.com/engine/installation/ for instructions on how to do this. Secondly, you can run the Docker container by running the command
